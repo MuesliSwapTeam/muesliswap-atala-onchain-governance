@@ -36,6 +36,7 @@ python server.py
 ```
 Then, in another separate terminal, run the tests via:
 ```bash
+cd src
 source .venv/bin/activate
 python -m test.tests
 ```
