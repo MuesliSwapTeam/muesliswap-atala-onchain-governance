@@ -24,7 +24,7 @@ import hashlib
 
 
 DID_NFT_POLICY_ID = "358587601623527cb63a89afba9873a97c407df960d19e21e11f6d15"
-DB_FILE_NAME = "users.db"
+DB_FILE_NAME = "../users.db"
 CHALLENGE_VALIDITY = 300  # seconds
 
 db = pw.SqliteDatabase(DB_FILE_NAME)
@@ -103,6 +103,8 @@ async def interaction_webhook(
     webhook_data: InteractionWebhookRequest,
 ) -> InteractionWebhookResponse:
     db.connect()
+    db.create_tables([User])
+    db.execute_sql("PRAGMA journal_mode=WAL;")
     User.replace(
         connect_did=webhook_data.subscriberConnectDid,
         atala_did=webhook_data.receivedCredentials[1].fields[0].value,

@@ -15,6 +15,31 @@ The directory `src` contains the source code for
  - `hook`: a server that hosts an endpoint to be called by ProofSpace for receiving credentials and storing them in a DB
  - `server`: serving the backend used by `frontend` for connecting with the user DID DB populated by `hook`
  - `onchain`: the [OpShin](https://github.com/OpShin) contract used as a minting script for the DID authentication NFT
+ - `test`: contains unit and interaction tests for the `hook` and `server` components (and their interaction)
+
+# Running Tests
+
+To setup the environment and running the tests provided in `test`, please first start the `server` via:
+```bash
+cd src/server
+npm install
+node server.js test
+```
+Then, in a separate terminal, run the hook server via:
+```bash
+cd src
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cd hook
+python server.py
+```
+Then, in another separate terminal, run the tests via:
+```bash
+source .venv/bin/activate
+python -m test.tests
+```
+Ideally, all three test runs should pass without errors (or warnings).
 
 # Demo
 
