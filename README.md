@@ -21,13 +21,13 @@ The directory `auth_nft_minting_tool` contains the source code for
 
 To setup the environment and running the tests provided in `test`, please first start the `server` via:
 ```bash
-cd auth_nft_minting_tool/server
+cd src/auth_nft_minting_tool/server
 npm install
 node server.js test
 ```
 Then, in a separate terminal, run the hook server via:
 ```bash
-cd auth_nft_minting_tool
+cd src/auth_nft_minting_tool
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -36,7 +36,7 @@ python server.py
 ```
 Then, in another separate terminal, run the tests via:
 ```bash
-cd auth_nft_minting_tool
+cd src/auth_nft_minting_tool
 source .venv/bin/activate
 python -m test.tests
 ```
