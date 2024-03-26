@@ -134,7 +134,7 @@ def main(
             multi_asset=asset_from_token(auth_nft_tk, 1),
         ),
         datum=tally.TallyState(
-            votes=[0, 0, 0, 0],
+            votes=[0, 0, 0],
             params=tally.ProposalParams(
                 quorum=prev_gov_state_datum.params.min_quorum,
                 proposals=[

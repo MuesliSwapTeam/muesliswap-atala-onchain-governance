@@ -128,9 +128,11 @@ Here's a video of a live demo: [Catalyst Milestone: Atala Prism DID Authenticati
 
 We provide the following references to `preprod` testnet transactions showing relevant smart contracts interactions:
 
-- [ ] TODO
-
-
+- [creation of a new governance thread](https://preprod.cexplorer.io/tx/d8aadc82162c7989a40ec75f309b96dc05ccdbfc48f58a4ec8bff190610e9fda)
+- [creation of a new tally](https://preprod.cexplorer.io/tx/c20cb35ac518ff580874a1e870fe2635699f1f2217018fe149a0a3132a29b3fd)
+- [creation of a new staking position](https://preprod.cexplorer.io/tx/a321eb9246044d437a7b199de7e519a02b876fec785db5869975cc58f4292bd0)
+- [adding a vote to a tally](https://preprod.cexplorer.io/tx/c6341d632b068ac044769e26e2e35ed9124502ad202c3eb88b9cd9f07529527d)
+- [initialize the treasury](https://preprod.cexplorer.io/tx/e5a26300a67f53b44dd1a310f6ea3594f52b3388ca251399c36363c736570791)
 
 
 [1]: [DAO Governance x Atala PRISM - By MuesliSwap](https://projectcatalyst.io/funds/10/f10-atala-prism-launch-ecosystem/dao-governance-x-atala-prism-by-muesliswap)
