@@ -1,4 +1,4 @@
-src/node_modules*
+auth_nft_minting_tool/node_modules*
 package-lock.json
 
 main.pdf

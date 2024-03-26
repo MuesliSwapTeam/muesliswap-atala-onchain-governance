@@ -10,7 +10,7 @@ in Fund 10 of Project Catalyst [1].
 The directory `report` contains a detailed report of our research results, design sketch,
 and implementation strategy as promised for Milestone 1 of the project.
 
-The directory `src` contains the source code for
+The directory `auth_nft_minting_tool` contains the source code for
  - `frontend`: a Atala PRISM authentication NFT minting tool that uses ProofSpace authentication
  - `hook`: a server that hosts an endpoint to be called by ProofSpace for receiving credentials and storing them in a DB
  - `server`: serving the backend used by `frontend` for connecting with the user DID DB populated by `hook`
@@ -21,13 +21,13 @@ The directory `src` contains the source code for
 
 To setup the environment and running the tests provided in `test`, please first start the `server` via:
 ```bash
-cd src/server
+cd auth_nft_minting_tool/server
 npm install
 node server.js test
 ```
 Then, in a separate terminal, run the hook server via:
 ```bash
-cd src
+cd auth_nft_minting_tool
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -36,7 +36,7 @@ python server.py
 ```
 Then, in another separate terminal, run the tests via:
 ```bash
-cd src
+cd auth_nft_minting_tool
 source .venv/bin/activate
 python -m test.tests
 ```
