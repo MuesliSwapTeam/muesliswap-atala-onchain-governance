@@ -3,7 +3,6 @@ name = "treasury_onchain_voting"
 version = "0.1.0"
 description = ""
 authors = ["MuesliSwapTeam <contact@muesliswap.com>"]
-readme = "README.md"
 packages = [{include = "contracts"}]
 
 [tool.poetry.dependencies]
