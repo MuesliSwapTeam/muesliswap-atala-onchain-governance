@@ -266,6 +266,14 @@ def check_greater_or_equal_value(a: Value, b: Value) -> None:
             ), f"Value of {policy_id.hex()}.{token_name.hex()} is too low"
 
 
+def check_output_reasonably_sized(output: TxOut, attached_datum: Anything) -> None:
+    """
+    Check that the output is reasonably sized
+    """
+    assert len(output.to_cbor()) <= 1000, "Output value too large"
+    assert len(serialise_data(attached_datum)) <= 1000, "Attached datum too large"
+
+
 def check_preserves_value(
     previous_state_input: TxOut, next_state_output: TxOut
 ) -> None:

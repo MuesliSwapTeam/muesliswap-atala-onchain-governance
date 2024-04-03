@@ -186,6 +186,7 @@ def validate_new_tally(
     assert (
         desired_new_gov_state == next_gov_state
     ), "Gov state must not change except for the last_proposal_id"
+    check_output_reasonably_sized(next_gov_state_output, next_gov_state)
     # ensure that no tokens are being removed from the gov state
     check_preserves_value(input, next_gov_state_output)
     # ensure that the new tally is created at the correct address
@@ -265,8 +266,9 @@ def validate_update_gov_state(
         desired_new_gov_state == new_gov_state
     ), "Gov state must be updated to the winning proposal"
 
-    # check that the value is preserved
+    # check that the value is preserved and not too many tokens are attached
     check_preserves_value(gov_state_input, new_gov_state_output)
+    check_output_reasonably_sized(new_gov_state_output, new_gov_state)
 
 
 def resolve_linear_input_state(datum: GovStateDatum) -> GovStateDatum:
