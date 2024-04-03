@@ -72,30 +72,29 @@ def transform_redeemer_to_delegated_redeemer(
 
 
 def check_owner_authorized_operation(
-    owner_signed: bool,
     previous_state: StakingState,
     redeemer: StakingRedeemer,
     previous_state_input: TxOut,
     vote_permission_nft_policy: PolicyId,
+    tx_info: TxInfo,
 ) -> None:
-    # Either the owner of the funds authorizes the operation by signing or by adding the correct NFT
-    if owner_signed:
-        return None
+    # The has to have authorized performing the operation by adding the correct NFT
 
     print("Owner did not sign tx, checking for permission NFT")
     assert isinstance(redeemer, AddVote) or isinstance(
         redeemer, RetractVote
     ), "Only adding or retracting votes is allowed without owner signature"
-    assert token_present_in_output(
-        Token(
-            vote_permission_nft_policy,
-            vote_permission_nft_token_name(
-                VotePermissionNFTParams(
-                    previous_state.params.owner,
-                    transform_redeemer_to_delegated_redeemer(redeemer, previous_state),
-                )
-            ),
+    spent_vote_permission_token = Token(
+        vote_permission_nft_policy,
+        vote_permission_nft_token_name(
+            VotePermissionNFTParams(
+                previous_state.params.owner,
+                transform_redeemer_to_delegated_redeemer(redeemer, previous_state),
+            )
         ),
+    )
+    assert token_present_in_output(
+        spent_vote_permission_token,
         previous_state_input,
     ), "Permission NFT was not spent in specified tally index input"
 
@@ -139,6 +138,22 @@ def check_extract_max_2_ada(
     check_greater_or_equal_value(next_value, prev_value_minus_one_ada)
 
 
+def check_preserve_staking_position_value(
+    previous_state_input: TxOut,
+    next_state_output: TxOut,
+    expected_value_change: Value,
+) -> None:
+    prev_value = previous_state_input.value
+    next_value = next_state_output.value
+    prev_value_plus_changed_value = add_value(
+        prev_value,
+        expected_value_change,
+    )
+    # note that it is fine to add in particular ada so that minutxo is preserved
+    # however no unrelated tokens are to be added which would increase the output size
+    check_equal_except_ada_increase(next_value, prev_value_plus_changed_value)
+
+
 def validator(
     vote_permission_nft_policy: PolicyId,
     state: StakingState,
@@ -172,14 +187,6 @@ def validator(
     )
     owner_controls_tx = user_signed_tx(previous_state.params.owner, tx_info)
 
-    # check that only the owner can perform operations
-    check_owner_authorized_operation(
-        owner_controls_tx,
-        previous_state,
-        redeemer,
-        previous_state_input,
-        vote_permission_nft_policy,
-    )
     # check that the new state is correct
     check_next_state_correct(next_state, desired_next_state)
     # check that the amount of governance tokens in the output is correct
@@ -187,7 +194,18 @@ def validator(
         desired_next_state, next_state_output, tx_info.valid_range
     )
     if not owner_controls_tx:
+        # check that only the owner can perform operations
+        expected_value_change = check_owner_authorized_operation(
+            previous_state,
+            redeemer,
+            previous_state_input,
+            vote_permission_nft_policy,
+            tx_info,
+        )
         # check that the executor may take a maximum of 2 ada from the output
-        check_extract_max_2_ada(previous_state_input, next_state_output)
+        # and adds/removes the correct NFTs
+        check_preserve_staking_position_value(
+            previous_state_input, next_state_output, expected_value_change
+        )
     # check that the staking state is not made too large accidentally
-    check_output_reasonably_sized(next_state_output, next_state)
+    check_staking_output_reasonably_sized(next_state_output, next_state)
