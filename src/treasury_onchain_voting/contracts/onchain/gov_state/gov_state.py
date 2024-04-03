@@ -274,6 +274,11 @@ def validate_update_gov_state(
     check_preserves_value(gov_state_input, new_gov_state_output)
     check_output_reasonably_sized(new_gov_state_output, new_gov_state)
 
+    # check that no tally is being created in this transaction
+    assert (
+        len([o for o in tx_info.outputs if o.address == params.tally_address]) == 0
+    ), "Invalid output to the tally address"
+
 
 def resolve_linear_input_state(datum: GovStateDatum) -> GovStateDatum:
     """
