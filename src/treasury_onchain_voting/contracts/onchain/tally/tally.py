@@ -296,7 +296,6 @@ def check_valid_tally_update(
     assert token_present_in_output(
         tally.params.tally_auth_nft, next_tally_output
     ), "Auth NFT missing from given output"
-    check_output_reasonably_sized(next_tally_output, next_tally_state)
 
 
 def resolve_staking_output(

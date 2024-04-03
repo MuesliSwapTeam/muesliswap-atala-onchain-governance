@@ -121,9 +121,6 @@ def resolve_linear_tally_output(
     assert (
         tally_address == gov_state.tally_address
     ), "Tally output is not at the tally address"
-    assert (
-        len([o for o in tx_info.outputs if o.address == gov_state.tally_address]) == 1
-    ), "More than one output to the tally address"
     return tally_output
 
 
@@ -189,11 +186,9 @@ def validate_new_tally(
     assert (
         desired_new_gov_state == next_gov_state
     ), "Gov state must not change except for the last_proposal_id"
-    check_output_reasonably_sized(next_gov_state_output, next_gov_state)
     # ensure that no tokens are being removed from the gov state
     check_preserves_value(input, next_gov_state_output)
     # ensure that the new tally is created at the correct address
-    # and no other tally is created
     tally_output = resolve_linear_tally_output(
         tx_info, redeemer.tally_output_index, params
     )
@@ -270,14 +265,8 @@ def validate_update_gov_state(
         desired_new_gov_state == new_gov_state
     ), "Gov state must be updated to the winning proposal"
 
-    # check that the value is preserved and not too many tokens are attached
+    # check that the value is preserved
     check_preserves_value(gov_state_input, new_gov_state_output)
-    check_output_reasonably_sized(new_gov_state_output, new_gov_state)
-
-    # check that no tally is being created in this transaction
-    assert (
-        len([o for o in tx_info.outputs if o.address == params.tally_address]) == 0
-    ), "Invalid output to the tally address"
 
 
 def resolve_linear_input_state(datum: GovStateDatum) -> GovStateDatum:

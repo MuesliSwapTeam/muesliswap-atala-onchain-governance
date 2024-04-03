@@ -277,14 +277,6 @@ def check_preserves_value(
     check_greater_or_equal_value(next_state_value, previous_state_value)
 
 
-def check_output_reasonably_sized(output: TxOut, attached_datum: Anything) -> None:
-    """
-    Check that the output is reasonably sized
-    """
-    assert len(output.to_cbor()) <= 1000, "Output value too large"
-    assert len(serialise_data(attached_datum)) <= 1000, "Attached datum too large"
-
-
 def list_index(listy: List[int], key: int) -> int:
     """
     Get the index of the first occurence of key in listy

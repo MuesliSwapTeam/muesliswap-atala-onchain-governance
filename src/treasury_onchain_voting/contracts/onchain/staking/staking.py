@@ -189,5 +189,3 @@ def validator(
     if not owner_controls_tx:
         # check that the executor may take a maximum of 2 ada from the output
         check_extract_max_2_ada(previous_state_input, next_state_output)
-    # check that the staking state is not made too large accidentally
-    check_output_reasonably_sized(next_state_output, next_state)
