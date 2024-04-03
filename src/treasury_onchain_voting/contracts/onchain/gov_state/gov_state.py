@@ -121,6 +121,9 @@ def resolve_linear_tally_output(
     assert (
         tally_address == gov_state.tally_address
     ), "Tally output is not at the tally address"
+    assert (
+        len([o for o in tx_info.outputs if o.address == gov_state.tally_address]) == 1
+    ), "More than one output to the tally address"
     return tally_output
 
 
@@ -190,6 +193,7 @@ def validate_new_tally(
     # ensure that no tokens are being removed from the gov state
     check_preserves_value(input, next_gov_state_output)
     # ensure that the new tally is created at the correct address
+    # and no other tally is created
     tally_output = resolve_linear_tally_output(
         tx_info, redeemer.tally_output_index, params
     )

@@ -1,7 +1,7 @@
 src/auth_nft_minting_tool/node_modules*
 package-lock.json
 
-keys/*
+src/treasury_onchain_voting/keys
 
 main.pdf
 secret*
