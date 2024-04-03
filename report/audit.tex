@@ -1,4 +1,3 @@
-
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{geometry}
@@ -66,7 +65,7 @@ It was identified that there was no existing mechanism to ensure the size of ass
 The primary concern revolved around excessively large script outputs, which could lead to inefficient operation of the on-chain governance mechanisms and possibly expose the system to various attacks. The issue is known as \textit{UTXO Value Size Spam AKA Token Dust Attack} \cite{CommonVuls}.
 
 \paragraph{Resolution}
-The resolution to this issue was swiftly implemented by a commit that introduces a simple, yet effective function designed to check the maximum size of script outputs before their execution. This function serves as a preventative measure, ensuring all script continuations adhere to predefined size constraints, thereby mitigating the risk previously identified.
+The resolution to this issue was implemented by commit \href{https://github.com/MuesliSwapTeam/muesliswap-atala-onchain-governance/commit/c99f0ab3f2e5a68499d4f137a53670ddee71510b}{c99f0ab} that introduces a simple, yet effective function designed to check the maximum size of script outputs before their execution. This function serves as a preventative measure, ensuring all script continuations adhere to predefined size constraints, thereby mitigating the risk previously identified.
 
 
 \subsection{Inadequate Validation in New Tally Function}
@@ -82,7 +81,7 @@ This situation could lead to only the tally specified in the redeemer being vali
 This flaw was noted as a critical oversight that could undermine the system's security and operational integrity.
 
 \paragraph{Suggested Resolution}
-The suggested resolution, involves incorporating an explicit check within the \texttt{validate\_new\_tally} function.
+The suggested resolution, implemented in commit \href{https://github.com/MuesliSwapTeam/muesliswap-atala-onchain-governance/commit/07572b5b699092fbff2aa0fb61fc14183e89179d}{07572b5}, involves incorporating an explicit check within the \texttt{validate\_new\_tally} function.
 This check would confirm that exactly one output is dedicated to a new tally, thereby safeguarding against the creation of multiple tallies.
 Furthermore, it was highlighted that a tally's validity is indirectly ensured by the requirement of an accompanying authorization NFT, which guarantees that only one NFT can be minted per transaction.
 Despite this indirect safeguard, the consensus was that an explicit check would offer a more robust solution.
@@ -105,7 +104,7 @@ This functionality raises significant concerns regarding:
 
 \paragraph{Resolution}
 Upon the issue being raised it was acknowledged as a vulnerability.
-The problem was addressed and resolved. The resolution involved:
+The problem was addressed and resolved in commit \href{https://github.com/MuesliSwapTeam/muesliswap-atala-onchain-governance/commit/1a4fdd35a69a374dee71f0192c61de08be7b9602}{1a4fdd3}. The resolution involved:
 \begin{itemize}
     \item \textbf{Clarification:} A clear explanation was provided, acknowledging the unintended functionality as a vulnerability.
     \item \textbf{Review and Testing:} The code was reviewed, and additional testing was conducted to ensure that arbitrary tally creation through the \texttt{UpdateGovState} redeemer is no longer possible, safeguarding the system's integrity and reliability.
@@ -125,8 +124,7 @@ The current system only ensures that stake is locked in the resulting position a
 This oversight opens the door to the possibility of \textit{Duplicate Voting}, undermining the fairness and integrity of the election process.
 
 \paragraph{Resolution}
-The vulnerability was acknowledged and addressed by a series of comments and a subsequent fix.
-The proposed solution involves enhancing the staking contract to include the necessary validations for staking updates and to enforce the invariant that prevents multiple participations by the same stake in an election.
+The vulnerability was acknowledged and addressed by a series of comments and a subsequent fix. This fix is already implemented in the earliest published version, i.e., commit \href{https://github.com/MuesliSwapTeam/muesliswap-atala-onchain-governance/commit/7bba7477828ae2b44ff7acc6335f0f2df080b41e}{7bba747} as the vulnerability was already discovered in the final stages of the smart contract development. The solution involves enhancing the staking contract to include the necessary validations for staking updates and to enforce the invariant that prevents multiple participations by the same stake in an election.
 This approach ensures that each stakeholder is limited to one vote per election, reinstating the intended democratic integrity of the voting mechanism.
 The issue was marked as resolved upon the implementation of these changes.
 
@@ -158,7 +156,7 @@ This limitation not only restricts the flexibility needed in the management of v
 The inability to burn vote NFTs could result in an inflated or inaccurate representation of voting power, undermining the governance framework's reliability.
 
 \paragraph{Resolution}
-The issue was addressed and resolved.
+The issue was addressed and resolved in commit \href{https://github.com/MuesliSwapTeam/muesliswap-atala-onchain-governance/commit/62b0d370f1daf889cce1cc18385a5cabd009b397}{62b0d37}.
 The resolution involved implementing a solution that introduced the necessary logic to validate and execute the burning of vote NFTs. This enhancement ensures that the governance framework can accurately reflect the current distribution of voting power by allowing for the removal of vote NFTs from circulation, thereby maintaining the integrity and accuracy of the voting process.
 
 
