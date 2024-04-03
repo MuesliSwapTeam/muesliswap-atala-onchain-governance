@@ -195,17 +195,12 @@ def validator(
     )
     if not owner_controls_tx:
         # check that only the owner can perform operations
-        expected_value_change = check_owner_authorized_operation(
+        check_owner_authorized_operation(
             previous_state,
             redeemer,
             previous_state_input,
             vote_permission_nft_policy,
             tx_info,
-        )
-        # check that the executor may take a maximum of 2 ada from the output
-        # and adds/removes the correct NFTs
-        check_preserve_staking_position_value(
-            previous_state_input, next_state_output, expected_value_change
         )
     # check that the staking state is not made too large accidentally
     check_staking_output_reasonably_sized(next_state_output, next_state)

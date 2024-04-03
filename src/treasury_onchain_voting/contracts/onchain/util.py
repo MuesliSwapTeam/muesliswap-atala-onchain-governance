@@ -274,6 +274,25 @@ def check_output_reasonably_sized(output: TxOut, attached_datum: Anything) -> No
     assert len(serialise_data(attached_datum)) <= 1000, "Attached datum too large"
 
 
+def check_staking_output_reasonably_sized(
+    output: TxOut, attached_datum: Anything
+) -> None:
+    """
+    Check that the staking output is reasonably sized
+
+    - staking state itself is ~200 bytes
+    - reduce the parts of the tally params that are stored in a participation (as of dd2cdde ~200 bytes)
+    - each participation token is ~60 bytes
+    - each governance/vault ft token is ~60 bytes (expected n <= 5)
+    - maximum tx size is ~20000bytes
+
+    if we restrict a staking position to participating in at most 40 votes at the same time, we arrive at 200 + 5*60 + (40*(200+60)) = ~11000 bytes
+
+    """
+    assert len(output.to_cbor()) <= 11000, "Output value too large"
+    assert len(serialise_data(attached_datum)) <= 8200, "Attached datum too large"
+
+
 def check_preserves_value(
     previous_state_input: TxOut, next_state_output: TxOut
 ) -> None:
@@ -427,3 +446,26 @@ def amount_of_token_in_value(
     value: Value,
 ) -> int:
     return value.get(token.policy_id, {b"": 0}).get(token.token_name, 0)
+
+
+def check_equal_except_ada_increase(a: Value, b: Value) -> None:
+    """
+    Check that the value of a is equal to the value of b, i.e. a == b
+    except for the ada amount which can increase, i.e. a["ada"] >= b["ada"]
+    """
+    pids = merge_without_duplicates(a.keys(), b.keys())
+    for policy_id in pids:
+        if policy_id == b"":
+            assert a.get(policy_id, EMTPY_TOKENNAME_DICT).get(b"", 0) >= b.get(
+                policy_id, EMTPY_TOKENNAME_DICT
+            ).get(b"", 0), f"Value of lovelace too low"
+        else:
+            a_tnd = a.get(policy_id, EMTPY_TOKENNAME_DICT)
+            b_tnd = b.get(policy_id, EMTPY_TOKENNAME_DICT)
+            tns = merge_without_duplicates(a_tnd.keys(), b_tnd.keys())
+            for token_name in tns:
+                assert a.get(policy_id, EMTPY_TOKENNAME_DICT).get(
+                    token_name, 0
+                ) == b.get(policy_id, EMTPY_TOKENNAME_DICT).get(
+                    token_name, 0
+                ), f"Value of {policy_id.hex()}.{token_name.hex()} is too low"
