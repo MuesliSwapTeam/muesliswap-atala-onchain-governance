@@ -1,0 +1,203 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{color}
+\usepackage[capitalise,noabbrev]{cleveref}
+\usepackage{caption}
+\usepackage{subcaption}
+\geometry{a4paper}
+
+\title{Treasury \& Voting Smart Contracts for\\DAO Governance $\times$ Atala PRISM\\[12pt]--- Testing Report ---}
+\author{MuesliSwapTeam}
+\date{\today}
+
+\usepackage{biblatex}
+\addbibresource{references.bib}
+
+
+\begin{document}
+
+\maketitle
+
+\section{Purpose \& Scope}
+The purpose of this document is to provide a detailed tesing report of a set of treasury and voting/governance smart contracts for the \emph{DAO Governance $\times$ Atala PRISM} project supported by Catalyst Fund 10. This includes the testing of all key functionalities, integration with the Cardano blockchain, and performance under different network conditions.
+
+A draft version of the platform has been developed in OpShin, a domain-specific language for smart contracts on the Cardano blockchain based on Python.
+This ensure maximum maintainability and readability of the code.
+Nontheless, before the platform is deployed on the Cardano blockchain, it is crucial to conduct comprehensive testing to ensure the security, reliability, and efficiency of the platform.
+In a first step, a seperated part of the team has preformed an independent tests of the code which is presented in this document.
+The document is made availabile to the public to ensure transparency and to provide a comprehensive overview of the testing process and its outcomes.
+The document is purely informative and does not constitute financial or investment advice nor does it promise or guarantee the absence of bugs
+or complete faithfulness of the analyzed code.
+
+The scope of this document entails a list of performed tests, methodologies applied, and detailed results for each tested component/property of the smart contract suite.
+
+\section{Basic Tests}
+
+Basic tests are performed to ensure the initial functionality and integrity of the smart contracts before detailed feature-specific testing. As implicit preliminary steps, this also includes compiling the contracts and deploying them on testnet. Then, as described in this section, we are running some initial checks to verify that the contracts are behaving as expected when being interacted with in the intended manner (tests for ensuring correct behavior on unintended interaction follow in the next section).
+
+\subsection{Creation of a new governance thread}
+\paragraph{Description.} First, we want to ensure that a new governance thread can be successfully initialized. This will create a thread represented by a UTxO with datum containing the thread's parameters at the governance contract. As a result, the unique thread ID will be printed by our off-chain code.
+\paragraph{Testing Procedure.} We run the following script that is part of our off-chain toolset.
+\begin{verbatim}
+$ python3 -m muesliswap_onchain_governance.offchain.gov_state.init --wallet creator
+\end{verbatim}
+\paragraph{Result.} In the transaction below, we see the respective governance thread being created as output, containing the unique NFT that authenticates this thread.
+\bigskip
+
+\includegraphics[width=\linewidth]{imgs/init-gov.png}
+
+
+\subsection{Creation of a new tally}
+\paragraph{Description.} Next, within the initialized governance thread, we create a new tally. Per default, this tally will be open for 10 minutes and allow staked users to add their votes which will be written into the tallies datum.
+
+\paragraph{Testing Procedure.} We run the following script that is part of our off-chain toolset.
+\begin{verbatim}
+$ python3 -m muesliswap_onchain_governance.offchain.gov_state.create_tally \
+--wallet creator
+\end{verbatim}
+\paragraph{Result.} In the transaction below, we see the governance thread created in the previous transaction being provided as input. As output we again have this governance thread, plus the newly created tally which is authenticated by another unique tally NFT.
+\bigskip
+
+\includegraphics[width=\linewidth]{imgs/init-tally.png}
+
+
+\subsection{Creation of a new staking position}
+\paragraph{Description.} Next, we want to move towards voting in the above created tally. For this we first need to have the voter stake some of her governance tokens into the dedicated staking contract. This is tested in the following.
+
+\paragraph{Testing Procedure.} We run the following script that is part of our off-chain toolset.
+\begin{verbatim}
+$ python3 -m muesliswap_onchain_governance.offchain.staking.init --wallet voter
+\end{verbatim}
+
+\paragraph{Result.} In the transaction below, we see how the voter locks 1000 tMILK tokens into the staking contract (first output) while her remaining tokens are returned to the voter's wallet (second output).
+\bigskip
+
+\includegraphics[width=\linewidth]{imgs/staking-init.png}
+
+\subsection{Adding a vote to a tally}
+
+\paragraph{Description.} Next, we want to actually have the user vote. The tally contract will check the voter's stake (here locked as tMILK into the staking contract) and enter a vote with the respective weight into the tally contract.
+
+\paragraph{Testing Procedure.} We run the following script that is part of our off-chain toolset.
+\begin{verbatim}
+$ python3 -m muesliswap_onchain_governance.offchain.tally.add_vote_tally \
+--wallet voter --proposal_id 1 --proposal_index 1
+\end{verbatim}
+\paragraph{Result.} Here, as inputs to the transaction, we have the previously created tally, as well as the UTxO containing the staked tMILK. The transactions outputs are given by the same UTxOs, where the staking UTxO now has an additional token representing the added vote.
+\bigskip
+
+\includegraphics[width=\linewidth]{imgs/add-vote.png}
+
+\subsection{Initialization of the treasury}
+\paragraph{Description.} In order to test whether positive election outcomes can successfully be used to initiate the resulting actions, here in terms of treasury payouts, we first need to initialize a treasury. This is done by creating an initial UTxO at the treasury contract with the respective treasury parameters in the datum.
+
+\paragraph{Testing Procedure.} We run the following script that is part of our off-chain toolset.
+\begin{verbatim}
+$ python3 -m muesliswap_onchain_governance.offchain.treasury.init --wallet creator
+\end{verbatim}
+\paragraph{Result.} Observe that a treasury output UTxO is created, containing by a unique treasury authentication NFT.
+\bigskip
+
+\includegraphics[width=\linewidth]{imgs/treasury-init.png}
+
+\subsection{Deposit funds to treasury}
+\paragraph{Description.} Next, we need to deposit some funds into the above initialized treasury UTxO. This is done as follows.
+
+\paragraph{Testing Procedure.} We run the following script that is part of our off-chain toolset.
+\begin{verbatim}
+$ python3 -m muesliswap_onchain_governance.offchain.treasury.deposit --wallet creator
+\end{verbatim}
+\paragraph{Result.} As outputs, in addition to the UTxO with the treasury authentication NFT, we get 5 new UTxOs at the treasury's value store contract holding the actual treasury funds. The desired number of such value store outputs can be configured in the script above.
+\bigskip
+
+\includegraphics[width=\linewidth]{imgs/treasury-deposit.png}
+
+\subsection{Treasury payout (after successful vote)}
+\paragraph{Description.} Finally, we want to use the outcome of our above created test election (which was about allowing a payout to the voter wallet, and which received one positive vote) in order to conduct the actual payout from the treasury.
+
+\paragraph{Testing Procedure.} We run the following script that is part of our off-chain toolset.
+\begin{verbatim}
+$ python3 -m muesliswap_onchain_governance.offchain.treasury.payout --wallet voter
+\end{verbatim}
+\paragraph{Result.} As inputs, we have the treasury's value store UTxOs and the UTxO representing the tally state which also contains the election outcome information.
+\bigskip
+
+\includegraphics[width=\linewidth]{imgs/payout-inputs.png}
+
+\bigskip
+From the outputs, we can observe that a payout of 5 Ada to the voter's wallet is taking place.
+\bigskip
+
+\includegraphics[width=\linewidth]{imgs/payout-outputs.png}
+
+
+\section{Testing Security Properties}
+
+Security testing focuses on verifying the robustness and reliability of smart contracts against common vulnerabilities and attacks. This section details tests aimed at ensuring that election cannot be manipulated. Moreover, we descibe how users can verify that their votes are taken into account correctly.
+
+\subsection{User cannot vote twice}
+\paragraph{Description.} In order to provide a fair election mechanism, it is of course essential to ensure that each user can only vote at most once on each tally. This is achieved by storing a reference to each voter's staking position (represented by the respective staking authentication NFT) in the tally's datum. In the following test we try to have a user vote twice on the same tally.
+
+\paragraph{Testing Procedure.} After creating a new tally and the voter's staking position as described before, we run the following commands to submit the same vote twice.
+\begin{verbatim}
+$ python3 -m muesliswap_onchain_governance.offchain.tally.add_vote_tally \
+--wallet voter --proposal_id 1 --proposal_index 1 \
+$ python3 -m muesliswap_onchain_governance.offchain.tally.add_vote_tally \
+--wallet voter --proposal_id 1 --proposal_index 1
+\end{verbatim}
+
+\paragraph{Result.} While the first voting transaction succeeds as before, when executing it for the second time, we get the following script failure trace:
+\begin{verbatim}
+'validationError': "An error has occurred:  User error: The machine terminated
+because of an error, either from a built-in function or from an explicit use of
+'error'.",
+'traces': ['Stake already participates in vote']
+\end{verbatim}
+
+
+
+
+\subsection{User (or 3rd party) can verify that vote has been counted}
+\paragraph{Description.} As a user, it is desirable to verify whether one's vote is actually taken into account. Since the entire tally state is stored on-chain in the tally UTxO's datum, this can be checked by looking at the tally output's datum of an add-vote transaction.
+
+\paragraph{Testing Procedure.} This does not require constructing any new transaction, we simply look at the output datum of above add-vote transaction.
+
+\paragraph{Result.} Here's the tally datum before adding the vote:
+\begin{verbatim}
+TallyState(votes=[0, 0, 0, 0], params=ProposalParams(...))
+\end{verbatim}
+
+And here is the datum after adding the vote:
+\begin{verbatim}
+TallyState(votes=[0, 1000, 0, 0], params=ProposalParams(...))
+\end{verbatim}
+
+As one can see, the vote has been entered accordingly with weight 1000. By inspecting the contract logic, the user can convince herself that votes contained in this datum are correctly taken into account.
+
+
+\subsection{No treasury payout if majority not reached}
+
+\paragraph{Description.} For this test we aim to construct a situation where no majority has been reached in a election, to demonstrate that then the proposed action cannot be executed. For this, we use the same tally as before, but in addition to the positive vote, we also add one negative vote. Then we try to perform the payout from the treasury.
+
+\paragraph{Testing Procedure.} After creating the tally, and staking positions for both the voter and creator wallets as shown before, we run the following commands to vote, each for a different proposal outcome. Then we try to perform the previously shown payout.
+
+\paragraph{Result.} As desired, we get the following script failure trace:
+\begin{verbatim}
+'validationError': "An error has occurred:  User error: The machine terminated
+because of an error, either from a built-in function or from an explicit use of
+'error'.",
+'traces': ['Quorum not reached']
+\end{verbatim}
+
+
+\section{Conclusion}
+
+The comprehensive testing covered in this report indicates that the treasury and voting/governance smart contracts for the DAO Governance × Atala PRISM project are robust and function as expected. While no major security issues were detected for this draft version of the smart contracts, continuous re-testing and reviews are necessary to ensure the contracts are suitable for deployment in a real-world DAO. For further results on the security of the tested smart contracts, we refer to the detailed audit report which also has been provided as part of the same Catalyst-funded project.
+
+\end{document}
