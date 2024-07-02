@@ -1,4 +1,4 @@
-name: CI
+name: CI Tests
 
 on:
   push:
@@ -26,8 +26,6 @@ jobs:
           sleep 5  # Wait for server to start
 
       - name: Start hook server
-        with:
-          python_version: '3.9'
         run: |
           cd src/auth_nft_minting_tool
           python3 -m venv .venv
@@ -38,9 +36,7 @@ jobs:
           sleep 5  # Wait for server to start
 
       - name: Run tests
-        with:
-          python_version: '3.9'
         run: |
           cd src/auth_nft_minting_tool
           source .venv/bin/activate
-          python -m test.tests
+          python -m pytest test/tests.py
