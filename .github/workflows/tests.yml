@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: '14'
 
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
       - name: Start server for Authentication NFT Minting Tool
         run: |
           cd src/auth_nft_minting_tool/server
