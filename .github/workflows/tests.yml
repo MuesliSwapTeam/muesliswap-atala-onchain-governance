@@ -48,5 +48,4 @@ jobs:
         run: |
           cd src/treasury_onchain_voting
           poetry install
-          poetry shell
-          pytest test
+          poetry run pytest test
