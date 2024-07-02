@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js and npm
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Start server for Authentication NFT Minting Tool
+        run: |
+          cd src/auth_nft_minting_tool/server
+          npm install
+          node server.js test &
+          sleep 5  # Wait for server to start
+
+      - name: Start hook server
+        with:
+          python_version: '3.9'
+        run: |
+          cd src/auth_nft_minting_tool
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          cd hook
+          python server.py &
+          sleep 5  # Wait for server to start
+
+      - name: Run tests
+        with:
+          python_version: '3.9'
+        run: |
+          cd src/auth_nft_minting_tool
+          source .venv/bin/activate
+          python -m test.tests
