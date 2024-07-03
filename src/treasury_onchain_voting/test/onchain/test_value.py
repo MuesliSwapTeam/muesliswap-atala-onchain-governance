@@ -212,3 +212,74 @@ def test_subtract_value(
         }
     }
     assert subtract_value_offchain(a, b) == res_value
+
+
+def check_equal_except_ada_increase_offchain(a: Value, b: Value) -> None:
+    """
+    Check that the value of a is equal to the value of b, i.e. a == b
+    except for the ada amount which can increase, i.e. a["ada"] >= b["ada"]
+    """
+    pids = merge_without_duplicates(list(a.keys()), list(b.keys()))
+    for policy_id in pids:
+        if policy_id == b"":
+            assert a.get(policy_id, EMTPY_TOKENNAME_DICT).get(b"", 0) >= b.get(
+                policy_id, EMTPY_TOKENNAME_DICT
+            ).get(b"", 0), f"Value of lovelace too low"
+        else:
+            a_tnd = a.get(policy_id, EMTPY_TOKENNAME_DICT)
+            b_tnd = b.get(policy_id, EMTPY_TOKENNAME_DICT)
+            tns = merge_without_duplicates(list(a_tnd.keys()), list(b_tnd.keys()))
+            for token_name in tns:
+                assert a.get(policy_id, EMTPY_TOKENNAME_DICT).get(
+                    token_name, 0
+                ) == b.get(policy_id, EMTPY_TOKENNAME_DICT).get(
+                    token_name, 0
+                ), f"Value of {policy_id}.{token_name} is too low"
+
+
+@given(
+    a1=st.integers(min_value=0, max_value=100),
+    a2=st.integers(min_value=0, max_value=100),
+    a3=st.integers(min_value=0, max_value=100),
+    a4=st.integers(min_value=0, max_value=100),
+    b1=st.integers(min_value=0, max_value=100),
+    b2=st.integers(min_value=0, max_value=100),
+    b3=st.integers(min_value=0, max_value=100),
+    b4=st.integers(min_value=0, max_value=100),
+)
+def test_check_equal_except_ada_increase(
+    a1: int,
+    a2: int,
+    a3: int,
+    a4: int,
+    b1: int,
+    b2: int,
+    b3: int,
+    b4: int,
+) -> None:
+    a = {
+        b"": {
+            b"": a1
+        },
+        MOCK_POLICY_ID: {
+            MOCK_TOKEN_NAMES[0]: a2,
+            MOCK_TOKEN_NAMES[1]: a3,
+            MOCK_TOKEN_NAMES[2]: a4,
+        }
+    }
+    b = {
+        b"": {
+            b"": b1
+        },
+        MOCK_POLICY_ID: {
+            MOCK_TOKEN_NAMES[0]: b2,
+            MOCK_TOKEN_NAMES[1]: b3,
+            MOCK_TOKEN_NAMES[2]: b4,
+        }
+    }
+    res = a1 >= b1 and a2 == b2 and a3 == b3 and a4 == b4
+    try:
+        check_equal_except_ada_increase_offchain(a, b)
+        assert res
+    except AssertionError:
+        assert not res
