@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: '14'
 
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
       - name: Start server for Authentication NFT Minting Tool
         run: |
           cd src/auth_nft_minting_tool/server
@@ -35,8 +38,14 @@ jobs:
           python server.py &
           sleep 5  # Wait for server to start
 
-      - name: Run tests
+      - name: Run authentication tool tests
         run: |
           cd src/auth_nft_minting_tool
           source .venv/bin/activate
           python -m pytest test/tests.py
+      
+      - name: Run SC tests
+        run: |
+          cd src/treasury_onchain_voting
+          poetry install
+          poetry run pytest test
