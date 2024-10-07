@@ -3,6 +3,7 @@ src/auth_nft_minting_tool/server/node_modules/*
 package-lock.json
 
 src/treasury_onchain_voting/keys
+node_modules
 
 *.db
 *.db-*
