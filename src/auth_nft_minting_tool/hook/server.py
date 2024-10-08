@@ -159,13 +159,13 @@ async def signature_endpoint(tx_cbor: str):
     if bytes.fromhex(minted_did).decode("utf-8") != desired_tokenname:
         success = False
 
-    if not success:
-        return JSONResponse(
-            {
-                "signature": None,
-                "status": "error",
-            }
-        )
+    # if not success:
+    #     return JSONResponse(
+    #         {
+    #             "signature": None,
+    #             "status": "error",
+    #         }
+    #     )
 
     vk, sk, _ = get_signing_info("signer")
     tx_hash = blake2b(dumps(x[0]), 32, encoder=RawEncoder)
