@@ -1,0 +1,139 @@
+\documentclass{article}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{float}
+
+
+\geometry{a4paper, margin=1in}
+
+\title{Milestone Report: DAO Governance x Atala PRISM\\(Milestone 4)}
+\author{Testing Report}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\vspace{8em}
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+This milestone report documents the completion of \textbf{Milestone 4}: ``On-chain Voting'' for the \textit{DAO Governance x Atala PRISM} project by MuesliSwap.
+
+The deliverables for this milestone were:
+\begin{itemize}
+    \item Adjustment of existing on-chain voting solutions to the project's requirements, both in terms of backend integration and smart contract design.
+    \item Full integration of on-chain elections into the existing off-chain voting platform.
+    \item Preparation of test elections and execution of an internal security audit.
+\end{itemize}
+
+This document includes:
+\begin{itemize}
+    \item A detailed testing report demonstrating the functionality of the integrated on-chain voting system.
+    \item A step-by-step demonstration of how to interact with the implemented on-chain solution, fully integrated with the backend and frontend.
+    \item User interface screenshots illustrating the voting process.
+    \item References to on-chain transactions showing the casting of votes via \textbf{DID tokens}.
+\end{itemize}
+
+
+
+\section{Testing \& Demo of On-Chain DID Voting}
+
+\subsection{Step 1: Mint DID Token via Atala PRISM / Proofspace Authentication}
+In this step, the user logs into our DID token minting tool by scanning a QR code with the Proofspace app.  
+The authentication process verifies the user's identity via their Atala PRISM DID, ensuring that only the authenticated individual can mint a DID token with the corresponding DID specification.  
+Once authenticated, the DID token is minted directly into the user's wallet.
+
+\begin{figure}[H]
+    \centering
+
+    \includegraphics[width=0.3\textwidth]{figures/step1_login.png}
+    \hspace{3em}
+    \includegraphics[width=0.15\textwidth]{figures/step1_mobile.png}
+
+    \vspace{2.5em}
+
+    \includegraphics[width=0.3\textwidth]{figures/step1_minting.png}
+    \hspace{2em}
+    \includegraphics[width=0.25\textwidth]{figures/step1_txsign.png}
+    \caption{Step 1: DID token minting process. Top row: Login screen with QR code (left) and login confirmation in the Proofspace mobile app (right).  
+    Bottom row: Minting interface (left) and transaction signing in the user's wallet (right).}
+\end{figure}
+
+\noindent
+\textbf{Transaction:}  
+\href{https://cexplorer.io/tx/d8f482fbd2a1b143d62027682c74200e6504e8271c14b618d7a10fb7886e49d1}{d8f482fbd2a1b143d62027682c74200e6504e8271c14b618d7a10fb7886e49d1} – This transaction shows the minting of the DID token, visible as a new asset in the user's wallet.
+
+\subsection{Step 2: Election / Proposal Creation}
+Through the on-chain DAO interface, specifically adapted for DID-authenticated elections, users can create proposals to be voted on.  
+The UI allows adding a proposal name, a detailed description, and multiple voting options.  
+Before proposals can be created, a governance thread must be initialized by an administrator (see first transaction below).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figures/step2_thread_creation.png}
+    \hfill
+    \includegraphics[width=0.45\textwidth]{figures/step2_proposal_form.png}
+    \caption{Proposal creation form (left) and proposal appearing in UI after having been submitted on-chain (right).}
+\end{figure}
+
+\noindent
+\textbf{Transactions:}  
+\begin{itemize}
+    \item \href{https://cexplorer.io/tx/bce826c7e739c3115432c6e9ecd14e517f2ecb8ea37ca8af1465c8fc8153ce87}{bce826c7e739c3115432c6e9ecd14e517f2ecb8ea37ca8af1465c8fc8153ce87} – Governance thread creation transaction.  
+    \item \href{https://cexplorer.io/tx/ceabf1f7940cf5e79f1e5dc2b90b8c39f250790f1a109ccd73fe8fd7e36f82f2}{ceabf1f7940cf5e79f1e5dc2b90b8c39f250790f1a109ccd73fe8fd7e36f82f2} – Proposal/tally creation transaction, containing metadata with proposal details.
+\end{itemize}
+
+\subsection{Step 3: Staking DID Token}
+To participate in voting, users must stake their DID token into the governance smart contract.  
+Once staked, the smart contract authenticates the user for the duration of the staking period, enabling them to vote on multiple proposals without restaking.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figures/step3_locking_interface.png}
+    \caption{Locking interface for staking DID token.}
+\end{figure}
+
+\noindent
+\textbf{Transaction:}  
+\href{https://cexplorer.io/tx/2450d065c3aaf3cf577638c59e417a51e8cca0616280f9d0f75e2d8b9fdaca7a}{2450d065c3aaf3cf577638c59e417a51e8cca0616280f9d0f75e2d8b9fdaca7a} – DID token staking transaction, showing the asset moving from the user's wallet into the governance contract address.
+
+\subsection{Step 4: Casting the Vote}
+Once authenticated via a staked DID token, the user can cast their vote on any active proposal through the voting UI.  
+Each DID token corresponds to at most one vote, ensuring that no user can vote more than once per proposal.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figures/step4_voting_process.png}
+    \hfill
+    \includegraphics[width=0.45\textwidth]{figures/step4_results.png}
+    \caption{Voting process (left) and proposal results display (right).}
+\end{figure}
+
+\noindent
+\textbf{Transaction:}  
+\href{https://cexplorer.io/tx/8e97052cfcfefa684cf35765516458826d25fbd564972a475ea52dca373c46ea}{8e97052cfcfefa684cf35765516458826d25fbd564972a475ea52dca373c46ea} – Voting transaction, recording the user's choice in the smart contract and updating the on-chain tally.
+
+
+\section{Conclusion}
+
+In this milestone, we successfully implemented and tested a fully integrated on-chain DID voting system.  
+We demonstrated the process from DID token minting and proposal creation to staking and casting votes, supported by UI screenshots and on-chain transaction evidence.  
+The internal security audit confirmed no critical issues.
+
+\medskip
+
+Looking ahead, the next and final milestone will focus on \textbf{protocol parameter update mechanisms}.  
+This will involve integrating parameter update functionality into one or more widely used open-source DeFi protocols, adapting smart contracts accordingly, and developing the required off-chain tooling.  
+We will conduct test elections that trigger example parameter updates on the testnet, complete a full internal audit, and prepare public-facing documentation, tutorials, and community engagement materials to facilitate adoption.  
+The milestone will conclude with open-sourcing the code and publishing a close-out report video as required by Fund~10.
+
+
+\end{document}
