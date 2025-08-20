@@ -102,17 +102,17 @@ class InteractionWebhookResponse(BaseModel):
 async def interaction_webhook(
     webhook_data: InteractionWebhookRequest,
 ) -> InteractionWebhookResponse:
-    # db.connect()
-    # db.create_tables([User])
-    # db.execute_sql("PRAGMA journal_mode=WAL;")
-    # User.replace(
-    #     connect_did=webhook_data.subscriberConnectDid,
-    #     atala_did=webhook_data.receivedCredentials[0].fields[0].value,
-    #     challenge=str(random.randint(2**20, 2**30)),
-    #     challenge_timestamp=datetime.now(),
-    # ).execute()
-    # db.commit()
-    # db.close()
+    db.connect()
+    db.create_tables([User])
+    db.execute_sql("PRAGMA journal_mode=WAL;")
+    User.replace(
+        connect_did=webhook_data.subscriberConnectDid,
+        atala_did=webhook_data.receivedCredentials[0].fields[0].value,
+        challenge=str(random.randint(2**20, 2**30)),
+        challenge_timestamp=datetime.now(),
+    ).execute()
+    db.commit()
+    db.close()
 
     return InteractionWebhookResponse(
         serviceDid=webhook_data.publicServiceDid,
