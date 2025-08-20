@@ -11,7 +11,7 @@ aiohttp[speedups]
 async-lru
 gelidum
 uvloop
-opshin>=0.16.0
+opshin==0.19.1
 click>=8.1.3
 peewee==3.17.0
 pytest==8.0.2
