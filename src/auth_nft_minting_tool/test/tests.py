@@ -106,11 +106,6 @@ async def test_full_authentication_flow():
         ],
         receivedCredentials=[
             WebhookCredentialValuesDTO(
-                credentialId="",
-                schemaId="",
-                fields=[],
-            ),
-            WebhookCredentialValuesDTO(
                 credentialId="testCredentialId",
                 schemaId="testSchemaId",
                 fields=[
