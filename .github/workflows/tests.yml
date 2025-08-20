@@ -56,4 +56,5 @@ jobs:
         run: |
           cd src/treasury_onchain_voting
           poetry install
+          poetry run pip install setuptools
           poetry run pytest test
