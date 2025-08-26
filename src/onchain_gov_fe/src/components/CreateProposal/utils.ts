@@ -41,19 +41,33 @@ export const handleChangeClbk = (
   }
 }
 
-const prepareMetadataStrings = (s: string) => {
+const byteSize = (str: string) => new Blob([str]).size
+
+const prepareMetadataStrings = (s: string): MetadataString => {
   const blockSize = 64
 
-  if (s.length < blockSize) return s
+  const s_len = byteSize(s)
+  // console.log("initial check", s_len, blockSize)
+  if (s_len < blockSize) return s
 
   const result = []
-  for (let i = 0; i < s.length; i += blockSize) {
-    result.push(s.slice(i, i + blockSize))
+  let bs
+  for (let i = 0; i < s_len; i += bs) {
+    let slice = ""
+    bs = blockSize
+    do {
+      // console.log("while ", slice, bs)
+      slice = s.slice(i, i + bs)
+      bs = bs - 1
+    } while (byteSize(slice) > blockSize)
+
+    // console.log(i, slice)
+    result.push(slice)
   }
   return result
 }
 
-type MetadataString = string | string[]
+type MetadataString = string | Uint8Array | (string | Uint8Array)[]
 export type TallyMetadataValues = {
   title: MetadataString
   creator_name: MetadataString

@@ -71,7 +71,7 @@ const Treasury: React.FC = () => {
     return history
       .filter(({ action }) => action !== "consolidate")
       .map(({ transaction_hash, delta, action, timestamp }) => {
-        // TODO pjordan: Figure out payout field and add support to link to daoDecision
+        // TODO : Figure out payout field and add support to link to daoDecision
         return {
           type: action.charAt(0).toUpperCase() + action.substring(1),
           amounts: delta,
@@ -101,7 +101,7 @@ const Treasury: React.FC = () => {
     return [total, assetList]
   }, [fundsIsLoading, fundsIsUninitialized, treasuryAssets])
 
-  // TODO pjordan: Add loading screen
+  // TODO : Add loading screen
   if (
     fundsIsLoading ||
     fundsIsUninitialized ||
@@ -113,6 +113,7 @@ const Treasury: React.FC = () => {
     chartIsUninitialized ||
     chartData === undefined ||
     talliesIsLoading ||
+    talliesIsUninitialized ||
     openTallies === undefined
   )
     return undefined
@@ -152,7 +153,7 @@ const Treasury: React.FC = () => {
             {formatNumberFixed(fromNativeAmount(totalAssets, 6), 2)} ADA
           </Text>
           <Text fontSize="2xl" color={textSbColor}>
-            $- {/* TODO pjordan: Add this */}
+            $- {/* TODO : Add this */}
           </Text>
         </Box>
       </Flex>

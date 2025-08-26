@@ -29,7 +29,7 @@ const HomePage: React.FC = () => {
           Muesliswap DAO
         </Heading>
         <Heading as="h2" size="lg">
-          Onchain Governance on Cardano
+          Decentralized On-chain Governance on Cardano
         </Heading>
       </Flex>
       {/* Three Boxes */}
@@ -41,23 +41,23 @@ const HomePage: React.FC = () => {
           <Text mt={4}>
             Muesliswap DAO empowers the community with full control, ensuring
             decisions are made transparently and democratically through on-chain
-            voting.
+            smart contracts.
           </Text>
         </Card>
         <Card p={5} shadow="lg" variant="outline">
           <Heading fontSize="xl">Community-Driven Development</Heading>
           <Text mt={4}>
-            Our platform prioritizes community input, allowing members to
-            propose and vote on upgrades and new features, driving continuous
-            improvement.
+            The platform allows community members to propose and vote on
+            upgrades and the project, driving continuous improvement and
+            ensuring efficient use of the DAO funds.
           </Text>
         </Card>
         <Card p={5} shadow="lg" variant="outline">
           <Heading fontSize="xl">Efficient and Scalable Ecosystem</Heading>
           <Text mt={4}>
-            Built on the Cardano blockchain, Muesliswap DAO leverages advanced
-            scalability and efficiency to support a wide range of decentralized
-            applications and services.
+            Built on the Cardano blockchain, the DAO infrastructures leverages
+            advanced scalability and efficiency to govern the entire MuesliSwap
+            protocol.
           </Text>
         </Card>
       </SimpleGrid>

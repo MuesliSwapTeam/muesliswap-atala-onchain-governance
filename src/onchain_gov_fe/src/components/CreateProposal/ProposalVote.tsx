@@ -60,7 +60,7 @@ const ProposalVote = (props: { idx: number }) => {
                 title={"Title"}
                 value={title}
                 setValue={setTitle}
-                charLimit={100}
+                charLimit={50}
                 disabled={form.isSubmitting}
                 error={meta.touched && meta.error ? meta.error : undefined}
               />

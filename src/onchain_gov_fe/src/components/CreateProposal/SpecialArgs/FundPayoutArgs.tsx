@@ -28,17 +28,20 @@ import ProposalTextInput from "../ProposalTextInput"
 import { Field, FieldProps, useField } from "formik"
 import { skipToken } from "@reduxjs/toolkit/query"
 import { useGetCuratedTokensQuery } from "../../../api/tokensApi"
+import { toNativeAmount } from "../../../utils/numericHelpers"
 
 interface Token {
   image: string
   address: { name: string; policyId: string }
   symbol: string
+  decimalPlaces: number
 }
 
 const DEFAULT_TOKEN: Token = {
   image: "https://muesliswap.com/static/media/ada.ae3e320f25e324286ae2.webp",
   symbol: "ADA",
   address: { name: "lovelace", policyId: "" },
+  decimalPlaces: 6,
 }
 
 const TokenSelectionButton = (props: {
@@ -111,11 +114,10 @@ const TokenSelectionButton = (props: {
 
 const AssetSelection = (props: { idx: number; voteIdx: number }) => {
   const [token, setToken] = useState<Token>(DEFAULT_TOKEN)
-  const [
-    { value: amount },
-    ,
-    { setValue: setAmount, setTouched: setAmountTouched },
-  ] = useField(`votes[${props.voteIdx}].args.assets[${props.idx}].quantity`)
+  const [amountStr, setAmountStr] = useState<string>()
+  const [, , { setValue: setAmount, setTouched: setAmountTouched }] = useField(
+    `votes[${props.voteIdx}].args.assets[${props.idx}].quantity`,
+  )
   const [, , { setValue: setUnit, setTouched: setUnitTouched }] = useField(
     `votes[${props.voteIdx}].args.assets[${props.idx}].unit`,
   )
@@ -135,10 +137,13 @@ const AssetSelection = (props: { idx: number; voteIdx: number }) => {
           {({ form, meta }: FieldProps) => (
             <FormControl isInvalid={meta.touched && !!meta.error}>
               <NumberInput
-                value={amount}
+                value={amountStr}
                 onChange={(v) => {
-                  setAmount(v)
-                  setAmountTouched(true)
+                  if (Number.isFinite(+v) && !Number.isNaN(+v)) {
+                    setAmountStr(v)
+                    setAmount(toNativeAmount(Number(v), token.decimalPlaces))
+                    setAmountTouched(true)
+                  }
                 }}
                 onBlur={() => setAmountTouched(true)}
                 size="sm"
@@ -162,9 +167,12 @@ const AssetSelection = (props: { idx: number; voteIdx: number }) => {
               <TokenSelectionButton
                 initialValue={token}
                 onSelect={(t: Token) => {
-                  setUnit(t.address.policyId + t.address.name)
+                  const unit = t.address.policyId + t.address.name
+                  setUnit(unit === "" ? "lovelace" : unit)
                   setUnitTouched(true)
                   setToken(t)
+                  setAmount(0)
+                  setAmountStr("0")
                 }}
                 disabled={form.isSubmitting}
               />

@@ -35,8 +35,11 @@ import { useLazyGetGovernanceStateQuery } from "../../api/governanceStateApi"
 import { Asset, Vote } from "../../api/model/tally"
 import useWalletContext from "../../context/wallet"
 import { Fragment } from "react/jsx-runtime"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useGetTreasuryFundsQuery } from "../../api/treasuryApi"
+import { useNavigate } from "react-router-dom"
+import { CheckCircleIcon } from "@chakra-ui/icons"
+import ConnectButton from "../ConnectButton"
 
 // Custom validation method
 declare module "yup" {
@@ -105,7 +108,7 @@ const useValidationSchema = () => {
               .required("Required"),
             title: Yup.string()
               .min(6, "Vote title must be at least 6 characters")
-              .max(100, "Vote title must be 100 character or less")
+              .max(50, "Vote title must be 50 character or less")
               .required("Required"),
             args: Yup.mixed()
               .when("type", {
@@ -180,13 +183,15 @@ const ProposalForm = () => {
   const validationSchema = useValidationSchema()
   const [fetch, { isFetching }] = useLazyGetGovernanceStateQuery()
 
+  const navigate = useNavigate()
   const { isOpen, onClose, onOpen } = useDisclosure()
 
+  const [txHash, setTxHash] = useState("")
   const handleSubmit = async (values: any) => {
     if (!isFetching) {
       const result = await fetch()
 
-      if (result.data) {
+      if (result.data && result.data.length) {
         const cleanValues = getCleanProposalValues(
           values.title,
           values.creator,
@@ -196,12 +201,12 @@ const ProposalForm = () => {
           values.votes,
         )
 
-        const govData = result.data[result.data.length - 1]
+        const govData = result.data[0]
         const hash = await createTally(
           govData.transaction_hash,
           govData.output_index,
           [
-            { unit: "lovelace", quantity: 2973940 },
+            { unit: "lovelace", quantity: 3029970 },
             {
               unit: govData.gov_nft.policy_id + govData.gov_nft.asset_name,
               quantity: 1,
@@ -214,14 +219,17 @@ const ProposalForm = () => {
           govData.last_proposal_id.toString(),
           (
             Number(Date.now()) +
-            govData.min_proposal_duration * 100000 +
+            2 * govData.min_proposal_duration +
             1e5
           ).toString(),
           JSON.stringify(cleanValues, null, 2),
           values.votes,
         )
         // Open the success dialog, if a tx hash is present
-        if (hash) { onOpen() }
+        if (hash) {
+          setTxHash(hash)
+          onOpen()
+        }
       }
     }
   }
@@ -246,7 +254,7 @@ const ProposalForm = () => {
             For the winning outcome to be valid, it must meet the quorum
             threshold.
           </li>
-          <li>Each proposal is open for voting for exactly x days.</li>
+          <li>Each proposal is open for voting for exactly 1 day.</li>
         </ol>
       </Box>
 
@@ -374,35 +382,71 @@ const ProposalForm = () => {
               </Button>
             </Box>
 
-            <Button
-              mt="16px"
-              ml="auto"
-              type="submit"
-              alignSelf="end"
-              bgGradient="linear(to-r, teal.500, green.500)"
-              color="white"
-              _hover={{ bgGradient: "linear(to-r, teal.600, green.600)" }}
-              isDisabled={
-                isFetching || values.votes.length <= 1 || !isConnected
-              }
-            // onClick={() => {
-            //   if (Object.keys(errors).length > 0) {
-            //     console.log('Errors preventing submission:', errors);
-            //   }
-            // }}
-            >
-              {isFetching ? "Loading..." : "Submit"}
-            </Button>
+            <Flex mt="16px">
+              <Box flexGrow="1" />
+              {!isConnected ? (
+                <ConnectButton longName />
+              ) : (
+                <Button
+                  type="submit"
+                  bgGradient="linear(to-r, teal.500, green.500)"
+                  color="white"
+                  _hover={{ bgGradient: "linear(to-r, teal.600, green.600)" }}
+                  isDisabled={
+                    isFetching || values.votes.length <= 0 || !isConnected
+                  }
+                  // onClick={() => {
+                  //   if (Object.keys(errors).length > 0) {
+                  //     console.log('Errors preventing submission:', errors);
+                  //   }
+                  // }}
+                >
+                  {isFetching ? "Loading..." : "Submit"}
+                </Button>
+              )}
+            </Flex>
           </Form>
         )}
       </Formik>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Created a new Proposal</ModalHeader>
+          <ModalHeader>
+            <Box display="flex" alignItems="center">
+              <CheckCircleIcon color="green.500" boxSize={6} mr={2} />
+              Proposal Created Successfully
+            </Box>
+          </ModalHeader>
           <ModalCloseButton />
-          <ModalBody w="100%">
-            Successfully created a new proposal!
+          <ModalBody w="100%" pb={4}>
+            <Text mb={4}>
+              Your new proposal has been successfully created and is being
+              processed on the blockchain. This process may take a few moments
+              to complete.
+            </Text>
+            <Text mb={4}>
+              You can track the your proposal on CardanoScan or check back on
+              the "All Proposals" page shortly. Please allow up to a minute for
+              the proposal to fully appear.
+            </Text>
+            <Text color="gray.500" fontSize="sm" mb={4}>
+              Once your proposal is fully confirmed, it will be visible to all
+              users and available for voting or further actions.
+            </Text>
+            <Button
+              colorScheme="blue"
+              mr={3}
+              onClick={() => {
+                /* TODO : Make this configurable */
+                const url = `https://preprod.cardanoscan.io/transaction/${txHash}`
+                window.open(url, "_blank")
+              }}
+            >
+              View on Cardanoscan
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/proposals")}>
+              Go to All Proposals
+            </Button>
           </ModalBody>
         </ModalContent>
       </Modal>

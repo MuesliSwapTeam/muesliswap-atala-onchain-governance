@@ -40,7 +40,7 @@ export type Asset = { quantity: number; unit: string }
 export type FundPayoutArgs = { address: string; assets: Asset[] }
 export type OpinionArgs = string
 
-type VoteArgsMap = {
+export type VoteArgsMap = {
   FundPayout: FundPayoutArgs
   Opinion: OpinionArgs
 }

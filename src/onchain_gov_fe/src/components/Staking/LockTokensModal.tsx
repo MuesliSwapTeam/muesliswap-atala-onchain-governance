@@ -24,9 +24,9 @@ import {
 } from "@chakra-ui/react"
 import { useState, FC } from "react"
 import { CheckCircleIcon } from "@chakra-ui/icons"
-import { lockTokens } from "../cardano/staking/base"
-import { toNativeAmount } from "../utils/numericHelpers"
-import { GOV_TOKEN_DECIMALS } from "../cardano/config"
+import { lockTokens } from "../../cardano/staking/base"
+import { toNativeAmount } from "../../utils/numericHelpers"
+import { GOV_TOKEN_DECIMALS } from "../../cardano/config"
 
 interface LockTokensModalProps {
   isOpen: boolean
@@ -45,7 +45,6 @@ const LockTokensModal: FC<LockTokensModalProps> = ({
   const [txHash, setTxHash] = useState<string | null>(null)
 
   const handleLockTokens = async () => {
-    console.log("Locking tokens:", amount)
     setIsLoading(true)
     setError(null)
     setTxHash(null)
@@ -123,7 +122,7 @@ const LockTokensModal: FC<LockTokensModalProps> = ({
             <Box textAlign="center" color={successColor}>
               <Flex justify="center" align="center" gap="1em" mb="1em">
                 <Icon as={CheckCircleIcon} w={10} h={10} />
-                <Text fontSize="lg">Transaction Successful!</Text>
+                <Text fontSize="lg">Transaction Created!</Text>
               </Flex>
               <Button
                 as="a"

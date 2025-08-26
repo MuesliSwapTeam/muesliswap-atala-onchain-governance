@@ -32,5 +32,8 @@ export const stakingApi = createApi({
   endpoints: (builder) => buildEndpoints(builder),
 })
 
-export const { useGetStakingPositionsQuery, useGetStakingHistoryQuery } =
-  stakingApi
+export const {
+  useLazyGetStakingPositionsQuery,
+  useGetStakingPositionsQuery,
+  useGetStakingHistoryQuery,
+} = stakingApi

@@ -6,7 +6,8 @@ import {
   useColorModeValue,
   useMediaQuery,
 } from "@chakra-ui/react"
-import { formatNumber } from "../utils/numericHelpers"
+import { formatNumber, fromNativeAmount } from "../utils/numericHelpers"
+import { GOV_TOKEN_DECIMALS } from "../cardano/config"
 
 const VoteBar = (props: {
   title?: string | ReactElement
@@ -96,19 +97,19 @@ const VotesBarChart: React.FC<VotesBarChartProps> = ({
     "grays.200.light",
     "grays.200.dark",
   )
-  const quorumColor = useColorModeValue("grays.500.light", "grays.500.dark")
+  const quorumColor = useColorModeValue("white.500.light", "white.500.dark")
   const totalWeight = votes.reduce((p, c) => p + c.weight, 0)
 
   const height = props.height ?? "30px"
   const bgColor = props.bgColor ?? containerBgColor
-  const [widthWeight, quorumPosition, missingVotes] = useMemo(() => {
-    const missingVotes = (quorum ?? 0) - totalWeight
+
+  const [widthWeight, quorumPosition] = useMemo(() => {
     if (quorum != null) {
       return totalWeight > 1.25 * quorum
-        ? [totalWeight, quorum / totalWeight, missingVotes]
-        : [1.25 * quorum, 0.8, missingVotes]
+        ? [totalWeight, quorum / totalWeight]
+        : [1.25 * quorum, 0.8]
     }
-    return [totalWeight, 1, missingVotes]
+    return [totalWeight, 1]
   }, [totalWeight, quorum])
 
   return (
@@ -157,13 +158,21 @@ const VotesBarChart: React.FC<VotesBarChartProps> = ({
           <Box height="100%" width={"4px"} bg={quorumColor} borderRadius="sm" />
           {!props.hideQuorumText && (
             <Text
-              color={quorumColor}
-              height="100%"
+              color="black"
               lineHeight={height}
-              ml="8px"
+              ml="-8px"
+              whiteSpace="nowrap"
+              overflow="hidden"
+              textAlign="left"
+              position="absolute"
+              left={`${Math.round(100 * quorumPosition)}%`} // Align with quorum line
             >
-              {formatNumber(Math.abs(missingVotes), 0)} Votes{" "}
-              {missingVotes >= 0 ? "missing" : "above Quorum"}
+              {formatNumber(
+                fromNativeAmount(totalWeight, GOV_TOKEN_DECIMALS),
+                0,
+              )}{" "}
+              / {formatNumber(fromNativeAmount(quorum, GOV_TOKEN_DECIMALS), 0)}{" "}
+              Votes{" "}
             </Text>
           )}
         </Flex>

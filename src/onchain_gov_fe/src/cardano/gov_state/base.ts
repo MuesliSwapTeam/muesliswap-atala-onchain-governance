@@ -272,6 +272,9 @@ function buildProposalList(proposals: Vote[]) {
         treasuryBenefactor,
         assetsToValue((proposal.args as FundPayoutArgs).assets),
       )
+
+      console.log("txOut", outputTx.to_hex())
+
       proposalList.push(FundPayoutParams(outputTx))
     }
   }
@@ -555,7 +558,7 @@ async function createTally(
 
   try {
     const txHash = await wallet.submitTx(signedTx.to_hex())
-    console.log("txHash", txHash)
+    console.log("Tally Creation TxHash", txHash)
     toast({
       title: "Tally Created",
       description: "Tally Creation submitted successfully.",
@@ -565,7 +568,7 @@ async function createTally(
     })
     return txHash
   } catch (error) {
-    console.log("error", error)
+    console.error("Tally Creation Error:", error)
     toast({
       title: "Tally Create Error",
       description: `Error received:\n${error}`,

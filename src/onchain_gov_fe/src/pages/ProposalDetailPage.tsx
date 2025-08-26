@@ -10,11 +10,17 @@ import {
   RadioGroup,
   Stack,
   Radio,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Divider,
 } from "@chakra-ui/react"
 import React, { useState, useEffect } from "react"
 import { useGetTallyDetailQuery } from "../api/tallyApi"
 import { skipToken } from "@reduxjs/toolkit/query"
 import { IoArrowBack } from "react-icons/io5"
+import { ChevronDownIcon, CheckIcon, PlusSquareIcon } from "@chakra-ui/icons"
 import { TiDocument, TiKey, TiCog } from "react-icons/ti"
 import { FaDollarSign, FaThumbsUp } from "react-icons/fa"
 import { Proposal } from "../api/model/tally"
@@ -22,9 +28,18 @@ import VotesBarChart from "../components/VotesBarChart"
 import { formatNumber } from "../utils/numericHelpers"
 import ProposalBarChart from "../components/ProposalBarChart"
 import { mintAddVotePermission } from "../cardano/staking/add_vote"
-import { useGetStakingPositionsQuery } from "../api/stakingApi"
+import { useLazyGetStakingPositionsQuery } from "../api/stakingApi"
 import useWalletContext from "../context/wallet"
 import { getWalletAddress } from "../cardano/wallet"
+import {
+  GOV_TOKEN_NAME_HEX,
+  GOV_TOKEN_POLICY_ID,
+  GOV_TOKEN_SYMBOL,
+} from "../cardano/config"
+import ConnectButton from "../components/ConnectButton"
+import { getStakedAmount } from "./Stake"
+import { StakingPosition } from "../api/model/staking"
+import { toast } from "../components/ToastContainer"
 
 const COLORS = [
   "#d62728",
@@ -90,49 +105,114 @@ const ProposalDetail: React.FC<{ proposal?: Proposal }> = ({ proposal }) => {
     }
   }, [isConnected])
 
-  const {
-    data: stakingPositions = [],
-    isLoading: isStakingLoading,
-    isUninitialized: isStakingUninitialized,
-  } = useGetStakingPositionsQuery(
-    walletAddressHex ? { wallet: walletAddressHex } : skipToken,
-  )
+  const [
+    fetchFn,
+    { isLoading: isStakingLoading, isUninitialized: isStakingUninitialized },
+  ] = useLazyGetStakingPositionsQuery()
 
-  console.log("proposal", proposal)
+  const [stakingPositions, setStakingPositions] = useState<StakingPosition[]>(
+    [],
+  )
+  const [selectedStakeId, setSelectedStakeId] = useState<number>()
+  const [selection, setSelection] = useState("")
+
+  useEffect(() => {
+    if (isConnected && walletAddressHex) {
+      fetchFn({ wallet: walletAddressHex }).then(({ data: resData }) => {
+        if (resData != null) {
+          const d = [...resData]
+          d.sort(function (a, b) {
+            return a.transaction_hash.localeCompare(b.transaction_hash)
+          })
+
+          if (!d.length) {
+            toast({
+              title: "No Staking Positions found",
+              description: `Before you can vote, you need to stake some ${GOV_TOKEN_SYMBOL} first`,
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+            })
+
+            return
+          }
+
+          if (proposal != undefined) {
+            // Find first free position and use that for our initial value
+            const di = d.findIndex(
+              (s) =>
+                s.participations.findIndex(
+                  (x) => x.proposal_id.toString() === proposal.id.toString(),
+                ) === -1 &&
+                s.delegated_actions.findIndex(
+                  (x) =>
+                    x.participation.proposal_id.toString() ===
+                    proposal.id.toString(),
+                ) === -1,
+            )
+
+            if (di === -1) {
+              toast({
+                title: "No Open Staking Position found",
+                description: `All your staking positions are currently in use. You will have to wait until they are unlocked again or create new staking positions`,
+                status: "warning",
+                duration: 5000,
+                isClosable: true,
+              })
+              setStakingPositions(d)
+              return
+            }
+
+            setStakingPositions(d)
+            setSelectedStakeId(di)
+          }
+        }
+      })
+    }
+  }, [walletAddressHex, isConnected])
 
   const handleOnClick = async () => {
     try {
       if (
         stakingPositions == undefined ||
-        stakingPositions.length === 0 ||
-        proposal === undefined
+        !stakingPositions.length ||
+        selectedStakeId == undefined ||
+        proposal == undefined
       )
         return
 
-      console.log("funds", stakingPositions[0])
+      const tokenAmountOutput = stakingPositions[selectedStakeId].funds.find(
+        (x) =>
+          x.policy_id === GOV_TOKEN_POLICY_ID &&
+          x.asset_name === GOV_TOKEN_NAME_HEX,
+      )
+      let tokenAmount = "0"
+
+      if (tokenAmountOutput) tokenAmount = tokenAmountOutput.amount
 
       // TODO: adjust vote and voting power
-      const hash = await mintAddVotePermission(
-        stakingPositions[0].funds.map((x) => {
+      await mintAddVotePermission(
+        stakingPositions[selectedStakeId].funds.map((x) => {
           return {
             unit: x.policy_id === "" ? "lovelace" : x.policy_id + x.asset_name,
             quantity: Number(x.amount),
           }
         }),
-        stakingPositions[0].transaction_hash,
-        stakingPositions[0].output_index.toString(),
-        "300000",
+        stakingPositions[selectedStakeId].transaction_hash,
+        stakingPositions[selectedStakeId].output_index.toString(),
+        tokenAmount,
         proposal.id.toString(),
         proposal.endDatePosix.toString(),
-        "0",
+        selection,
+        stakingPositions[selectedStakeId].participations.length > 0
+          ? stakingPositions[selectedStakeId].participations
+          : undefined,
       )
     } catch (error) {
-      console.error("Unlock transaction failed", error)
+      console.error("Vote transaction failed", error)
     } finally {
     }
   }
-
-  const [selection, setSelection] = useState("")
 
   if (!proposal) {
     return <Text color={textColor}>Proposal not found</Text>
@@ -262,7 +342,7 @@ const ProposalDetail: React.FC<{ proposal?: Proposal }> = ({ proposal }) => {
               <Stack direction="column">
                 {proposal.votes.map((v, i) => {
                   return (
-                    <Radio key={v.title + i} value={v.title}>
+                    <Radio key={v.title + i} value={i.toString()}>
                       {i + 1}. <b>{v.title}</b>
                     </Radio>
                   )
@@ -270,25 +350,91 @@ const ProposalDetail: React.FC<{ proposal?: Proposal }> = ({ proposal }) => {
               </Stack>
             </RadioGroup>
 
-            <Button
-              onClick={handleOnClick}
-              bg={selection === "Reject" ? "red" : "green"}
-              isDisabled={
-                selection === "" || isStakingUninitialized || isStakingLoading
-              }
-              _hover={{
-                bg: selection === "Reject" ? "red" : "green", // Keep the same color on hover
-              }}
-              sx={{
-                "&:disabled": {
-                  _hover: {
-                    bg: selection === "Reject" ? "red" : "green", // Ensure hover color remains the same even when disabled
-                  },
-                },
-              }}
-            >
-              {selection === "Reject" ? "Reject Proposal" : "Accept Selection"}
-            </Button>
+            {!isConnected ? (
+              <ConnectButton longName />
+            ) : (
+              <>
+                {/* Stake Selector to support multiple votes during the same time frame */}
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    rightIcon={<ChevronDownIcon />}
+                    variant="outline"
+                  >
+                    Selected Stake:{" "}
+                    {selectedStakeId == null
+                      ? "-"
+                      : `${getStakedAmount(stakingPositions[selectedStakeId].funds)} ${GOV_TOKEN_SYMBOL}`}
+                  </MenuButton>
+                  <MenuList>
+                    {stakingPositions.map((v, i) => {
+                      const alreadyVoted =
+                        v.participations.findIndex(
+                          (x) => x.proposal_id === proposal.id.toString(),
+                        ) !== -1 ||
+                        v.delegated_actions.findIndex(
+                          (x) =>
+                            x.participation.proposal_id.toString() ===
+                            proposal.id.toString(),
+                        ) !== -1
+
+                      return (
+                        <MenuItem
+                          key={v.transaction_hash}
+                          onClick={() => setSelectedStakeId(i)}
+                          disabled={alreadyVoted}
+                          isDisabled={alreadyVoted}
+                        >
+                          <Flex justify="space-between" align="center" w="full">
+                            {getStakedAmount(v.funds)} {GOV_TOKEN_SYMBOL}{" "}
+                            {alreadyVoted && " (already voted)"}{" "}
+                            {selectedStakeId === i && <CheckIcon />}
+                          </Flex>
+                        </MenuItem>
+                      )
+                    })}
+                    <Divider my="2px" />
+                    <MenuItem
+                      onClick={() => {
+                        window.location.pathname = "/stake"
+                      }}
+                    >
+                      <Flex
+                        justify="space-between"
+                        align="center"
+                        w="full"
+                        opacity={0.8}
+                      >
+                        Stake more <PlusSquareIcon />
+                      </Flex>
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+
+                <Button
+                  onClick={handleOnClick}
+                  bg={selection === "0" ? "red" : "green"}
+                  isDisabled={
+                    selection === "" ||
+                    isStakingUninitialized ||
+                    isStakingLoading ||
+                    selectedStakeId == null
+                  }
+                  _hover={{
+                    bg: selection === "0" ? "red" : "green", // Keep the same color on hover
+                  }}
+                  sx={{
+                    "&:disabled": {
+                      _hover: {
+                        bg: selection === "0" ? "red" : "green", // Ensure hover color remains the same even when disabled
+                      },
+                    },
+                  }}
+                >
+                  {selection === "0" ? "Reject Proposal" : "Accept Selection"}
+                </Button>
+              </>
+            )}
           </Flex>
         )}
       </Flex>

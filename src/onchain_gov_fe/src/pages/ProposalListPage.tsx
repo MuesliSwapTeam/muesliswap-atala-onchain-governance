@@ -58,7 +58,7 @@ const ProposalList: React.FC<{ proposals: Proposal[] }> = ({ proposals }) => {
       {proposals.length === 0 ? (
         <Alert status="info">
           <AlertIcon />
-          There are currently no open proposals.
+          There are currently no proposals.
         </Alert>
       ) : (
         proposals.map((proposal) => (
@@ -167,7 +167,7 @@ const ProposalListPage: React.FC = () => {
             Propose Idea
           </Button>
         </Link>
-        {/* TODO pjordan: Add button "Show Governance Thread", 
+        {/* TODO : Add button "Show Governance Thread", 
                             which opens a small status modal/view of the current governance thread 
                             and some information about it 
 

@@ -6,6 +6,18 @@ import {
 import { GOV_TOKEN_POLICY_ID, GOV_TOKEN_NAME_HEX } from "./config.ts"
 import { fromHex } from "./utils/utils.ts"
 
+import { toast } from "../components/ToastContainer.ts"
+
+export function wrongNetworkToast() {
+  toast({
+    title: "Wrong Network",
+    description: "Please switch to the Cardano Preprod network",
+    status: "error" as "error",
+    duration: 5000,
+    isClosable: false,
+  })
+}
+
 const WALLET_CONNECTOR_KEY = "wallet-connector-store"
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let WALLET_CONNECTOR: any = undefined
@@ -13,6 +25,11 @@ export async function setWallet(connectorName: string | undefined) {
   if (connectorName != null) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     WALLET_CONNECTOR = await (window as any).cardano[connectorName].enable()
+    const networkId = await WALLET_CONNECTOR.getNetworkId()
+    if (networkId === 1) {
+      wrongNetworkToast()
+      return
+    }
     localStorage.setItem(WALLET_CONNECTOR_KEY, connectorName)
   } else {
     WALLET_CONNECTOR = undefined
@@ -25,6 +42,11 @@ export async function restoreWallet() {
   if (connectorName != null) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     WALLET_CONNECTOR = await (window as any).cardano[connectorName].enable()
+    const networkId = await WALLET_CONNECTOR.getNetworkId()
+    if (networkId === 1) {
+      wrongNetworkToast()
+      return false
+    }
     return true
   }
   return false

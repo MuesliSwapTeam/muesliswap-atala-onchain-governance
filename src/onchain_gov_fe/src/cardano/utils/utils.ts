@@ -18,12 +18,12 @@ import {
   ScriptHash,
   Transaction,
   TransactionWitnessSet,
-  PlutusList,
   PlutusMap,
   BigInt,
-  ConstrPlutusData,
   TransactionUnspentOutputs,
   TransactionUnspentOutput,
+  PlutusMapValues,
+  hash_plutus_data,
 } from "@emurgo/cardano-serialization-lib-browser"
 import Fraction from "fraction.js"
 import { sha256 } from "js-sha256"
@@ -35,12 +35,6 @@ export function fromHex(hex: string) {
 
 export function toHex(bytes: Uint8Array) {
   return Buffer.from(bytes).toString("hex")
-}
-
-async function muesliRequest(endpoint: string) {
-  return await fetch("https://api.muesliswap.com" + endpoint, {
-    method: "GET",
-  }).then((res) => res.json())
 }
 
 async function blockfrostRequest(endpoint: string) {
@@ -139,10 +133,6 @@ export async function getTXBuilder(protocolParameters: protocolParameterType) {
     Number(protocolParameters.coinsPerUtxoByte),
   )
 
-  const refScriptCoinsPerByte = Math.ceil(
-    Number(protocolParameters.refScriptFeeByte),
-  )
-
   // used protocolParameters.coinsPerUtxoWord instead of '100'
   const txBuilderConfig = TransactionBuilderConfigBuilder.new()
     .coins_per_utxo_byte(BigNum.from_str(coinsPerUtxoByte.toString()))
@@ -235,6 +225,36 @@ export function createOutputInlineDatum(
   return outputFinal
 }
 
+export function createOutputDatumHash(
+  address: Address,
+  value: Value,
+  datum: PlutusData,
+): TransactionOutput {
+  const v = value
+
+  const output = TransactionOutput.new(address, v)
+
+  const datumHash = hash_plutus_data(datum)
+
+  if (datum) {
+    output.set_data_hash(datumHash)
+  }
+
+  // TODO: replace with correct parameter value
+  const dataCost = DataCost.new_coins_per_byte(BigNum.from_str("4310"))
+  const minAda = min_ada_for_output(output, dataCost)
+
+  if (minAda.compare(v.coin()) == 1) v.set_coin(minAda)
+
+  const outputFinal = TransactionOutput.new(address, v)
+
+  if (datum) {
+    outputFinal.set_data_hash(datumHash)
+  }
+
+  return outputFinal
+}
+
 export function getSha256HashByte(text: Uint8Array): string {
   const hash = sha256.update(text)
   return hash.hex()
@@ -275,6 +295,7 @@ export async function signSubmitTx(
 
   try {
     const txHash = await wallet.submitTx(signedTx.to_hex())
+    console.log("Stake TxHash", txHash)
     toast({
       title: "Tokens staked",
       description: "Tokens successfully staked.",
@@ -284,7 +305,7 @@ export async function signSubmitTx(
     })
     return txHash
   } catch (error) {
-    console.log("error", error)
+    console.error("Stake Error", error)
     toast({
       title: "Stake Error",
       description: `Error received:\n${error}`,
@@ -328,6 +349,7 @@ export function unixTimeToSlot(unixTime: number): number {
 
 // Function to convert Value to PlutusData
 export function valueToPlutusData(value: Value): PlutusData {
+  // They are only there so I could get the build working
   const multiassetMap = PlutusMap.new()
 
   // Handle Lovelace (ADA) separately
@@ -335,9 +357,14 @@ export function valueToPlutusData(value: Value): PlutusData {
   const adaMap = PlutusMap.new()
   adaMap.insert(
     PlutusData.new_bytes(Buffer.from("")),
-    PlutusData.new_integer(BigInt.from_str(value.coin().to_str())),
+    PlutusData.new_integer(
+      BigInt.from_str(value.coin().to_str()),
+    ) as unknown as PlutusMapValues,
   )
-  multiassetMap.insert(adaKey, PlutusData.new_map(adaMap))
+  multiassetMap.insert(
+    adaKey,
+    PlutusData.new_map(adaMap) as unknown as PlutusMapValues,
+  )
 
   // Handle other assets if any
   const multiasset = value.multiasset()
@@ -359,12 +386,14 @@ export function valueToPlutusData(value: Value): PlutusData {
 
         assetMap.insert(
           PlutusData.new_bytes(assetName.name()), // Convert AssetName to bytes
-          PlutusData.new_integer(BigInt.from_bytes(assetValue.to_bytes())), // Convert value to BigInt
+          PlutusData.new_integer(
+            BigInt.from_bytes(assetValue.to_bytes()),
+          ) as unknown as PlutusMapValues, // Convert value to BigInt
         )
       }
       multiassetMap.insert(
         PlutusData.new_bytes(scriptHash.to_bytes()), // Convert ScriptHash to bytes
-        PlutusData.new_map(assetMap), // Insert asset map
+        PlutusData.new_map(assetMap) as unknown as PlutusMapValues, // Insert asset map
       )
     }
   }

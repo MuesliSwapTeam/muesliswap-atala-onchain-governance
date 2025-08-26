@@ -103,7 +103,7 @@ const HistoryCard = ({
                   <Td>{transaction.date}</Td>
                   <Td>
                     <a
-                      href={`https://cardanoscan.io/transaction/${transaction.txHash}`}
+                      href={`https://preprod.cardanoscan.io/transaction/${transaction.txHash}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

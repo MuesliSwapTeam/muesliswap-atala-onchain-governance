@@ -5,7 +5,6 @@ import {
   BigNum,
   BigInt,
   Value,
-  OutputDatum,
 } from "@emurgo/cardano-serialization-lib-browser"
 import { fromHex, valueToPlutusData } from "../utils/utils"
 

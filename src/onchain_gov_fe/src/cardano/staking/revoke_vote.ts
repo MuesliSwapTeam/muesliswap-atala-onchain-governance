@@ -50,7 +50,7 @@ import { contract } from "./stakingScript"
 import { AddFunds } from "../types/redeemer"
 import { contract as mintScript } from "../tally/mintScript"
 import {
-  DelegatedAddVote,
+  DelegatedRetractVote,
   Participation,
   ReducedProposalParams,
   VotePermissionNFTParams,
@@ -71,13 +71,13 @@ function buildAddRedeemer(stateInputIdx: string, stateOutputIdx: string) {
     RedeemerTag.new_spend(),
     BigNum.from_str("0"),
     redeemerData,
-    ExUnits.new(BigNum.from_str("650000"), BigNum.from_str("300000000")),
+    ExUnits.new(BigNum.from_str("1000000"), BigNum.from_str("400000000")),
   )
 
   return redeemer
 }
 
-function buildVotePermissionRedeemer(
+function buildRevokeVotePermissionRedeemer(
   pubKeyHash: string,
   stakeKeyHash: string | undefined,
   weight: string,
@@ -121,24 +121,26 @@ function buildVotePermissionRedeemer(
     weight,
     proposalIndex,
   )
-  const delegatAddVoteRedeemer = DelegatedAddVote(participationRedeemer)
+  const delegateRetractVoteRedeemer = DelegatedRetractVote(
+    participationRedeemer,
+  )
 
   const redeemerData = VotePermissionNFTParams(
     ownerAddress,
-    delegatAddVoteRedeemer,
+    delegateRetractVoteRedeemer,
   )
 
   const redeemer = Redeemer.new(
     RedeemerTag.new_mint(),
     BigNum.from_str("0"),
     redeemerData,
-    ExUnits.new(BigNum.from_str("650000"), BigNum.from_str("300000000")),
+    ExUnits.new(BigNum.from_str("1000000"), BigNum.from_str("500000000")),
   )
 
   return redeemer
 }
 
-export async function mintAddVotePermission(
+export async function mintRetractVotePermission(
   stakingTxValuesAttached: { unit: string; quantity: number }[],
   stakingTxHash: string,
   stakingTxOutputIdx: string,
@@ -237,7 +239,7 @@ export async function mintAddVotePermission(
     PlutusScript.new_v2(fromHex(mintScript)),
   )
 
-  const mintRedeemer = buildVotePermissionRedeemer(
+  const mintRedeemer = buildRevokeVotePermissionRedeemer(
     pubKeyHash,
     stakeKeyHash,
     weight,
@@ -298,7 +300,7 @@ export async function mintAddVotePermission(
 
   if (!collateralUtxo) {
     toast({
-      title: "Vote Request Error",
+      title: "Vote Revoke Error",
       description: `Collateral not found. Please set your collateral to continue`,
       status: "error",
       duration: 5000,
@@ -365,20 +367,19 @@ export async function mintAddVotePermission(
 
   try {
     const txHash = await wallet.submitTx(signedTx.to_hex())
-    console.log("Vote TxHash", txHash)
     toast({
-      title: "Voting Successful",
+      title: "Voting Revoked Succesfully",
       description:
-        "Vote successfully submitted. Your vote will soon be processed.",
+        "Vote successfully revoked. Your revokation will soon be processed.",
       status: "success",
       duration: 5000,
       isClosable: true,
     })
     return txHash
   } catch (error) {
-    console.error("Vote Error", error)
+    console.error("Vote Revoked Error", error)
     toast({
-      title: "Voting Error",
+      title: "Voting Revoked Error",
       description: `Error received:\n${error}`,
       status: "error",
       duration: 5000,
