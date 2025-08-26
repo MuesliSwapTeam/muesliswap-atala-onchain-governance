@@ -1,6 +1,10 @@
+from typing import Union
+
 import cbor2
 
 import pycardano
+from opshin import prelude
+
 from ..db_models import (
     TransactionOutputValue,
     TransactionOutput,
@@ -8,14 +12,22 @@ from ..db_models import (
     Datum,
     Token,
     Block,
+    Transaction,
 )
+
+
+def add_address_raw(address: bytes) -> Address:
+    """
+    Store the address in the database.
+    """
+    return Address.get_or_create(address_raw=address.hex())[0]
 
 
 def add_address(address: pycardano.Address) -> Address:
     """
     Store the address in the database.
     """
-    return Address.get_or_create(address_raw=address.to_primitive().hex())[0]
+    return add_address_raw(address.to_primitive())
 
 
 def add_datum(datum: pycardano.Datum) -> Datum:
@@ -28,23 +40,43 @@ def add_datum(datum: pycardano.Datum) -> Datum:
     )[0]
 
 
-def add_token_raw(policy_id: bytes, asset_name: bytes) -> Token:
+def add_token_token(token: prelude.Token) -> Token:
     """
     Store the token in the database.
     """
-    return Token.get_or_create(
-        policyId=policy_id.hex(),
-        assetName=asset_name.hex(),
-    )[0]
+    return add_token(token.policy_id, token.token_name)
 
 
 def add_token(
-    policy_id: pycardano.ScriptHash, asset_name: pycardano.AssetName
+    policy_id: Union[pycardano.ScriptHash, bytes],
+    asset_name: Union[pycardano.AssetName, bytes],
 ) -> Token:
     """
     Store the token in the database.
     """
-    return add_token_raw(policy_id.to_primitive(), asset_name.to_primitive())
+    if isinstance(policy_id, pycardano.ScriptHash):
+        policy_id = policy_id.payload
+    if isinstance(asset_name, pycardano.AssetName):
+        asset_name = asset_name.payload
+    return Token.get_or_create(
+        policy_id=policy_id.hex(),
+        asset_name=asset_name.hex(),
+    )[0]
+
+
+def add_transaction(
+    transaction_hash: str,
+    block: Block,
+    block_index: int,
+):
+    """
+    Store the transaction in the database.
+    """
+    return Transaction.get_or_create(
+        transaction_hash=transaction_hash,
+        block=block,
+        block_index=block_index,
+    )[0]
 
 
 def add_output(
@@ -52,6 +84,7 @@ def add_output(
     index: int,
     transaction_hash: str,
     block: Block,
+    block_index: int,
 ) -> TransactionOutput:
     """
     Store the value of the output in the database.
@@ -62,22 +95,22 @@ def add_output(
         datum_hash = tx_output.datum_hash.to_primitive().hex()
     else:
         datum_hash = None
-    output, existed = TransactionOutput.get_or_create(
-        transaction_hash=transaction_hash,
+    output, created = TransactionOutput.get_or_create(
         output_index=index,
         address=add_address(tx_output.address),
         datum_hash=datum_hash,
-        block=block,
+        transaction_hash=transaction_hash,
+        transaction=add_transaction(transaction_hash, block, block_index),
     )
-    if existed:
+    if not created:
         return output
     lovelace = tx_output.amount.coin
     TransactionOutputValue.create(
         transaction_output=output,
-        token=add_token_raw(b"", b""),
+        token=add_token(b"", b""),
         amount=lovelace,
     )
-    for policy_id, d in tx_output.amount.multi_asset:
+    for policy_id, d in tx_output.amount.multi_asset.items():
         for asset_name, amount in d.items():
             token = add_token(policy_id, asset_name)
             TransactionOutputValue.create(

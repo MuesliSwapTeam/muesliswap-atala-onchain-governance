@@ -6,10 +6,11 @@ from dataclasses import dataclass
 import pycardano
 import websocket
 
-from muesliswap_onchain_governance.api.config import (
+from api_backend.config import (
     start_block_slot,
     start_block_hash,
 )
+from api_backend.util import FixedTxHashTransaction
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -103,13 +104,18 @@ def tip_from_block(block: dict) -> Tip:
     )
 
 
-def txs_from_block(block: dict) -> list[pycardano.Transaction]:
+def txs_from_block(block: dict) -> list[FixedTxHashTransaction]:
     if block["type"] == "ebb":
         return []
     txs_transformed = []
     for tx in block["transactions"]:
         try:
-            txs_transformed.append(pycardano.Transaction.from_cbor(tx["cbor"]))
+            txs_transformed.append(
+                FixedTxHashTransaction(
+                    transaction=pycardano.Transaction.from_cbor(tx["cbor"]),
+                    hash=tx["id"],
+                )
+            )
         except KeyError as e:
             raise ValueError(
                 f"Error parsing transactions in block: {e}, make sure that --include-cbor is set as flag when running ogmios"

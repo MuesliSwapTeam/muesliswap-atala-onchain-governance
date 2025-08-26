@@ -27,12 +27,12 @@ class Block(BaseModel):
 
 
 class Token(BaseModel):
-    policyId = PolicyId()
-    assetName = AssetName()
+    policy_id = PolicyId()
+    asset_name = AssetName()
 
     class Meta:
-        indexes = ((("policyId", "assetName"), True),)
-        constraints = [SQL("UNIQUE (policyId, assetName)")]
+        indexes = ((("policy_id", "asset_name"), True),)
+        constraints = [SQL("UNIQUE (policy_id, asset_name)")]
 
 
 class Address(BaseModel):
@@ -44,8 +44,14 @@ class Datum(BaseModel):
     data = CBORField()
 
 
+class Transaction(BaseModel):
+    transaction_hash = CharField(max_length=64, unique=True, index=True)
+    block = ForeignKeyField(Block, backref="transactions", on_delete="CASCADE")
+    block_index = IntegerField()
+
+
 class TransactionOutput(BaseModel):
-    block = ForeignKeyField(Block, backref="transaction_outputs", on_delete="CASCADE")
+    transaction = ForeignKeyField(Transaction, backref="outputs", on_delete="CASCADE")
     transaction_hash = CharField(max_length=64)
     output_index = IntegerField()
     address = ForeignKeyField(Address, backref="outputs", index=True)
@@ -66,8 +72,9 @@ class OutputStateModel(BaseModel):
 
 
 class TransActionModel(BaseModel):
-    transaction_hash = CharField(max_length=64, unique=True, index=True)
-    block = ForeignKeyField(Block, backref="transactions", on_delete="CASCADE")
+    transaction = ForeignKeyField(
+        Transaction, backref="transactions", on_delete="CASCADE"
+    )
 
 
 class TransactionOutputValue(BaseModel):

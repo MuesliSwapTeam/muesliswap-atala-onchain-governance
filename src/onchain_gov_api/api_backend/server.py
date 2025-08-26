@@ -11,6 +11,14 @@ from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi.middleware.cors import CORSMiddleware
 from gelidum import freeze
 
+from api_backend.db_models import db
+from api_backend.db_queries import (
+    gov_state,
+    staking,
+    tally,
+    treasury,
+)
+
 # logger setup
 _LOGGER = logging.getLogger(__name__)
 
@@ -171,3 +179,133 @@ TransactionIdQuery = DashingQuery(
     examples=[0, 1, 2],
     # TODO add validation
 )
+
+
+@app.get("/api/v1/health")
+def health():
+    last_block = db.Block.select().order_by(db.Block.slot.desc()).first()
+    return ORJSONResponse(
+        {
+            "status": "ok" if last_block else "nok",
+            "last_block": {
+                "slot": last_block.slot,
+                "height": last_block.height,
+                "hash": last_block.hash,
+            }
+            if last_block
+            else None,
+        }
+    )
+
+
+@app.get("/api/v1/staking/positions")
+def staking_positions(
+    wallet: str = WalletQuery,
+):
+    """
+    Get the currently open staking positions for a wallet.
+    """
+    return ORJSONResponse(staking.query_staking_positions_per_wallet(wallet))
+
+
+@app.get("/api/v1/staking/history")
+def staking_history(
+    wallet: str = WalletQuery,
+):
+    """
+    Get the staking history for a wallet.
+    """
+    return ORJSONResponse(staking.query_staking_history_per_wallet(wallet))
+
+
+@app.get("/api/v1/tallies")
+def tallies(
+    open: bool = DashingQuery(
+        description="Show open tallies",
+        examples=["true", "false", "1", "0"],
+    ),
+    closed: bool = DashingQuery(
+        description="Show closed tallies",
+        examples=["true", "false", "1", "0"],
+    ),
+):
+    """
+    Get all open tallies
+    """
+    return ORJSONResponse(tally.query_tallies(closed, open))
+
+
+@app.get("/api/v1/tallies/tally_detail")
+def tally_detail(
+    tally_auth_nft: str = DashingQuery(
+        description="Tally Auth NFT",
+        examples=[
+            "471b0b6f3fab69f9c6e8c1c1389782a410a8689d97e22a22ac24b30f.bc0a47f8459162152c33913f9d4e50d2340459ce4b6197761967d64368e0e50c"
+        ],
+    ),
+    tally_proposal_id: int = DashingQuery(
+        description="Tally Proposal ID",
+        examples=[0, 1, 2],
+    ),
+):
+    """
+    Get details for a specific tally
+    """
+    return ORJSONResponse(
+        tally.query_tally_details_by_auth_nft_proposal_id(
+            tally_auth_nft, tally_proposal_id
+        )
+    )
+
+
+@app.get("/api/v1/tallies/tally_votes")
+def tally_votes(
+    tally_auth_nft: str = DashingQuery(
+        description="Tally Auth NFT",
+        examples=[
+            "471b0b6f3fab69f9c6e8c1c1389782a410a8689d97e22a22ac24b30f.bc0a47f8459162152c33913f9d4e50d2340459ce4b6197761967d64368e0e50c"
+        ],
+    ),
+    tally_proposal_id: int = DashingQuery(
+        description="Tally Proposal ID",
+        examples=[0, 1, 2],
+    ),
+):
+    """
+    Get votes for a specific tally
+    """
+    return ORJSONResponse(
+        tally.query_all_user_votes_for_tally(tally_auth_nft, tally_proposal_id)
+    )
+
+
+@app.get("/api/v1/treasury/funds")
+def treasury_funds():
+    """
+    Get the funds in the current treasury
+    """
+    return ORJSONResponse(treasury.query_current_treasury_funds())
+
+
+@app.get("/api/v1/treasury/history")
+def treasury_history():
+    """
+    Get the deposits, payouts and other operations on the treasury
+    """
+    return ORJSONResponse(treasury.query_treasury_history())
+
+
+@app.get("/api/v1/treasury/chart")
+def treasury_historical_funds():
+    """
+    Get the accumulated funds in treasury over time
+    """
+    return ORJSONResponse(treasury.query_historical_treasury_funds())
+
+
+@app.get("/api/v1/gov/state")
+def current_gov_state():
+    """
+    Get the current state of the governance system
+    """
+    return ORJSONResponse(gov_state.query_current_gov_state())
