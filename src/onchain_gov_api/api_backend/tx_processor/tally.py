@@ -18,11 +18,11 @@ from ..config import gov_state_nft_policy_id
 from ..db_models import Block, TransactionOutput, Transaction, TrackedGovStates
 from ..db_models import tally_state as db_tally
 
-from ...onchain.tally import tally as onchain_tally
+from onchain_dependencies.tally import tally as onchain_tally
 
 import logging
 
-from ...utils.from_script_context import from_address
+from utils.from_script_context import from_address
 
 _LOGGER = logging.getLogger(__name__)
 

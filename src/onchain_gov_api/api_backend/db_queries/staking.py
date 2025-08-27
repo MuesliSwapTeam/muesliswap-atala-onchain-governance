@@ -1,6 +1,6 @@
 import cbor2
 
-from ...onchain_components.util import Participation
+from onchain_dependencies.util import Participation
 from opshin.ledger.api_v2 import FinitePOSIXTime
 from .util import parse_merged_assets
 from ..db_models import sqlite_db

@@ -11,11 +11,11 @@ from ..config import gov_state_nft_policy_id
 from ..db_models import Block, TransactionOutput, Transaction
 from ..db_models import gov_state as db_gov_state
 
-from ...onchain.gov_state import gov_state as onchain_gov_state
+from onchain_dependencies.gov_state import gov_state as onchain_gov_state
 
 import logging
 
-from ...utils.from_script_context import from_address
+from utils.from_script_context import from_address
 
 _LOGGER = logging.getLogger(__name__)
 

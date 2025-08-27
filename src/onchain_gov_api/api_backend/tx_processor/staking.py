@@ -19,7 +19,7 @@ from ..db_models import (
     TrackedGovStates,
 )
 
-from ...onchain.staking import staking as onchain_staking
+from onchain_dependencies.staking import staking as onchain_staking
 
 import logging
 
@@ -32,7 +32,7 @@ from ..db_models.staking import (
     StakingDepositParticipationRemoved,
     StakingDepositParticipationAdded,
 )
-from ...utils.from_script_context import from_address
+from utils.from_script_context import from_address
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -8,7 +8,6 @@ from .gov_state import process_tx as process_gov_state_tx
 from .staking import process_tx as process_staking_tx
 from .tally import process_tx as process_tally_tx
 from .licenses import process_tx as process_licenses_tx
-from .treasury import process_tx as process_treasury_tx
 
 
 def process_tx(
@@ -38,4 +37,3 @@ def process_tx(
     process_staking_tx(tx, block, block_index, tracked_gov_states)
     process_tally_tx(tx, block, block_index, tracked_gov_states)
     process_licenses_tx(tx, block, block_index, tracked_gov_states)
-    process_treasury_tx(tx, block, block_index, tracked_treasury_states)

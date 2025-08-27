@@ -1,13 +1,13 @@
 import pycardano
 from pycardano import Network
 
-from ..utils.contracts import module_name
-from ..utils import network, contracts
+from utils.contracts import module_name
+from utils import network, contracts
 
-from ..onchain.gov_state import gov_state_nft
-from ..onchain.staking import vote_permission_nft
-from ..onchain.licenses import licenses
-from ..onchain.treasury import treasurer_nft
+from onchain_dependencies.gov_state import gov_state_nft
+from onchain_dependencies.staking import vote_permission_nft
+from onchain_dependencies.licenses import licenses
+from onchain_dependencies.treasury import treasurer_nft
 
 # Only these scripts need to be hardcoded
 # And should also change seldomly

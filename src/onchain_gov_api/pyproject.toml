@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "onchain-gov-api"
+name = "api_backend"
 version = "0.1.0"
 description = ""
 authors = ["MuesliSwapTeam <contact@muesliswap.com>"]

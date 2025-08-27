@@ -22,7 +22,7 @@ from ..db_models import (
 )
 from ..db_models.licenses import LicenseMint, LicenseOutput
 
-from ...onchain.licenses import licenses as onchain_licenses
+from onchain_dependencies.licenses import licenses as onchain_licenses
 
 import logging
 

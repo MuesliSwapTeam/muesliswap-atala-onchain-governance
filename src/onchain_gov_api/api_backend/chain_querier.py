@@ -7,7 +7,7 @@ import logging
 import fire
 from api_backend.tx_processor import process_tx
 
-from ..utils.network import ogmios_url
+from utils.network import ogmios_url
 from . import ogmios
 from .db_models import Block, GovState, TransactionOutput, TreasurerState
 
