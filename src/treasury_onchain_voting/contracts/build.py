@@ -48,27 +48,6 @@ def build_compressed(
     ]
     subprocess.run(command)
 
-    built_contract = Path(f"build/{script.stem}/script.cbor")
-    built_contract_compressed_cbor = Path(f"build/tmp.cbor")
-
-    with built_contract_compressed_cbor.open("wb") as fp:
-        subprocess.run(["plutonomy-cli", built_contract, "--default"], stdout=fp)
-
-    subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "uplc",
-            "build",
-            "--from-cbor",
-            built_contract_compressed_cbor,
-            "-o",
-            f"build/{script.stem}_compressed",
-            "--recursion-limit",
-            "2000",
-        ]
-    )
-
 
 def token_from_token_string(token: str) -> Token:
     policy_id, token_name = token.split(".")
@@ -121,7 +100,7 @@ def main(
         )
 
     _, gov_state_nft_script_hash, _ = get_contract(
-        module_name(gov_state_nft), compressed=True
+        module_name(gov_state_nft)
     )
     build_compressed(
         "minting",
@@ -131,7 +110,7 @@ def main(
         ],
     )
 
-    _, _, tally_address = get_contract(module_name(tally), compressed=True)
+    _, _, tally_address = get_contract(module_name(tally))
     build_compressed(
         "minting",
         staking_vote_nft.__file__,
@@ -139,7 +118,7 @@ def main(
     )
 
     _, vote_permission_nft_script_hash, _ = get_contract(
-        module_name(vote_permission_nft), compressed=True
+        module_name(vote_permission_nft)
     )
     build_compressed(
         "spending",

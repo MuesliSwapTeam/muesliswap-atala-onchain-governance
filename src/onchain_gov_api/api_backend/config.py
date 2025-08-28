@@ -12,16 +12,16 @@ from onchain_dependencies.treasury import treasurer_nft
 # Only these scripts need to be hardcoded
 # And should also change seldomly
 _, gov_state_nft_policy_id, _ = contracts.get_contract(
-    module_name(gov_state_nft), compressed=True
+    module_name(gov_state_nft)
 )
 _, vote_permission_nft_policy_id, _ = contracts.get_contract(
-    module_name(vote_permission_nft), compressed=True
+    module_name(vote_permission_nft)
 )
 _, licenses_policy_id, _ = contracts.get_contract(
-    module_name(licenses), compressed=True
+    module_name(licenses)
 )
 _, treasurer_nft_policy_id, _ = contracts.get_contract(
-    module_name(treasurer_nft), compressed=True
+    module_name(treasurer_nft)
 )
 
 # default: start from a block around 19 feb 2024

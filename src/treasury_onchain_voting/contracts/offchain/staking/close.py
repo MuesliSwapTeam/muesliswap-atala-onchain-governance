@@ -39,7 +39,7 @@ def main(
         staking_script,
         _,
         staking_address,
-    ) = get_contract(module_name(staking), True)
+    ) = get_contract(module_name(staking))
 
     # Get payment address
     payment_vkey, payment_skey, payment_address = get_signing_info(

@@ -44,24 +44,24 @@ def main(
         tally_script,
         _,
         tally_address,
-    ) = get_contract(module_name(tally), True)
+    ) = get_contract(module_name(tally))
     tally_script = get_ref_utxo(tally_script, context) or tally_script
     (
         staking_script,
         _,
         staking_address,
-    ) = get_contract(module_name(staking), True)
+    ) = get_contract(module_name(staking))
     staking_script = get_ref_utxo(staking_script, context) or staking_script
     (
         staking_vote_nft_script,
         staking_vote_nft_policy_id,
         _,
-    ) = get_contract(module_name(staking_vote_nft), True)
+    ) = get_contract(module_name(staking_vote_nft))
     (
         _,
         tally_auth_nft_policy_id,
         _,
-    ) = get_contract(module_name(tally_auth_nft), True)
+    ) = get_contract(module_name(tally_auth_nft))
     tally_auth_nft_tk = Token(
         tally_auth_nft_policy_id.payload, bytes.fromhex(tally_auth_nft_tk_name)
     )

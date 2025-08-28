@@ -40,9 +40,9 @@ def main(
         staking_script,
         _,
         staking_address,
-    ) = get_contract(module_name(staking), True)
-    (_, tally_auth_nft_policy_id, _) = get_contract(module_name(tally_auth_nft), True)
-    (_, vault_ft_policy_id, _) = get_contract(module_name(vault_ft), True)
+    ) = get_contract(module_name(staking))
+    (_, tally_auth_nft_policy_id, _) = get_contract(module_name(tally_auth_nft))
+    (_, vault_ft_policy_id, _) = get_contract(module_name(vault_ft))
 
     tally_auth_nft_tk = Token(
         tally_auth_nft_policy_id.payload, bytes.fromhex(tally_auth_nft_tk_name)

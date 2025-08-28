@@ -45,34 +45,34 @@ def main(
         gov_state_nft_script,
         gov_state_nft_policy_id,
         _,
-    ) = get_contract(module_name(gov_state_nft), True)
+    ) = get_contract(module_name(gov_state_nft))
     gov_nft_ref_utxo = get_ref_utxo(gov_state_nft_script, context)
     (
         gov_state_script,
         gov_state_policy_id,
         gov_state_address,
-    ) = get_contract(module_name(gov_state), True)
+    ) = get_contract(module_name(gov_state))
     (
         tally_script,
         tally_policy_id,
         tally_address,
-    ) = get_contract(module_name(tally), True)
+    ) = get_contract(module_name(tally))
     (
         _,
         tally_auth_nft_policy_id,
         _,
-    ) = get_contract(module_name(tally_auth_nft), True)
+    ) = get_contract(module_name(tally_auth_nft))
     (
         _,
         staking_vote_nft_policy_id,
         _,
-    ) = get_contract(module_name(staking_vote_nft), True)
+    ) = get_contract(module_name(staking_vote_nft))
     (
         staking_script,
         staking_policy_id,
         staking_address,
-    ) = get_contract(module_name(staking), True)
-    (_, vault_ft_policy_id, _) = get_contract(module_name(vault_ft), True)
+    ) = get_contract(module_name(staking))
+    (_, vault_ft_policy_id, _) = get_contract(module_name(vault_ft))
 
     # Get payment address
     payment_vkey, payment_skey, payment_address = get_signing_info(

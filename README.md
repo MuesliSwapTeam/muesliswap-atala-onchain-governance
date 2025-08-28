@@ -62,7 +62,7 @@ For this, you need to have an Ogmios endpoint available and set the environment 
 Further, install the current project.
 
 ```bash
-cd src/treasury-onchain-voting
+cd src/treasury_onchain_voting
 poetry install
 poetry shell
 ```
@@ -76,7 +76,7 @@ python3 -m contracts.create_key_pair voter
 python3 -m contracts.create_key_pair vault_admin
 ```
 
-Then, build the smart contracts. Note that this requires the [`plutonomy-cli`](https://github.com/OpShin/plutonomy-cli) executable present in the `PATH` environment variable.
+Then, build the smart contracts.
 
 ```bash
 python3 -m contracts.build

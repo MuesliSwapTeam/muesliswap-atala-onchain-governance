@@ -44,19 +44,19 @@ def main(
         gov_state_script,
         _,
         gov_state_address,
-    ) = get_contract(module_name(gov_state), True)
+    ) = get_contract(module_name(gov_state))
     (
         tally_script,
         _,
         tally_address,
-    ) = get_contract(module_name(tally), True)
+    ) = get_contract(module_name(tally))
     (
         tally_auth_nft_script,
         tally_auth_nft_policy_id,
         _,
-    ) = get_contract(module_name(tally_auth_nft), True)
-    (_, gov_state_nft_policy_id, _) = get_contract(module_name(gov_state_nft), True)
-    (_, vault_ft_policy_id, _) = get_contract(module_name(vault_ft), True)
+    ) = get_contract(module_name(tally_auth_nft))
+    (_, gov_state_nft_policy_id, _) = get_contract(module_name(gov_state_nft))
+    (_, vault_ft_policy_id, _) = get_contract(module_name(vault_ft))
 
     gov_state_nft_tk = Token(
         gov_state_nft_policy_id.payload, bytes.fromhex(gov_state_nft_tk_name)

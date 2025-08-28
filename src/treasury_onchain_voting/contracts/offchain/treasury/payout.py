@@ -58,22 +58,22 @@ def main(
         treasurer_nft_script,
         treasurer_nft_policy_id,
         _,
-    ) = get_contract(module_name(treasurer_nft), True)
+    ) = get_contract(module_name(treasurer_nft))
     (
         treasurer_script,
         _,
         treasurer_address,
-    ) = get_contract(module_name(treasurer), True)
+    ) = get_contract(module_name(treasurer))
     treasurer_script_ref_utxo = get_ref_utxo(treasurer_script, context)
     (value_store_script, _, value_store_address) = get_contract(
-        module_name(value_store), True
+        module_name(value_store)
     )
     value_store_ref_utxo = get_ref_utxo(value_store_script, context)
     (
         _,
         _,
         tally_address,
-    ) = get_contract(module_name(tally), True)
+    ) = get_contract(module_name(tally))
 
     # Get payment address
     payment_vkey, payment_skey, payment_address = get_signing_info(
