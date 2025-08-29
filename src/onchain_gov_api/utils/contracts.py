@@ -13,7 +13,7 @@ from pycardano import (
 from .keys import get_address
 from .network import network
 
-build_dir = Path(__file__).parent.parent.parent.joinpath("build")
+build_dir = Path(__file__).parent.parent.parent.joinpath("treasury_onchain_voting").joinpath("build")
 
 
 def module_name(module):
