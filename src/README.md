@@ -22,7 +22,7 @@ The directory `src/auth_nft_minting_tool` contains the source code for
 
 ### Treasury & On-Chain Governance Smart Contracts (Milestone 2)
 
-The directory `src/treasury-onchain-voting/contracts` contains the source code for
+The directory `src/treasury_onchain_voting/contracts` contains the source code for
  - `onchain`: the OpShin smart contracts for the on-chain treasury and governance system, and
  - `offchain`: the off-chain scripts for deploying and interacting with the contracts in `onchain`.
 
@@ -62,7 +62,7 @@ For this, you need to have an Ogmios endpoint available and set the environment 
 Further, install the current project.
 
 ```bash
-cd src/treasury-onchain-voting
+cd src/treasury_onchain_voting
 poetry install
 poetry shell
 ```
