@@ -39,6 +39,39 @@ or complete faithfulness of the analyzed code.
 The scope of this document entails a list of discovered vulnerabilities and potential security threats in the MuesliSwap On-Chain Governance platform.
 Moreover it includes recommendations for improving the security and reliability of the platform.
 
+\subsection{Scope of Audited Smart Contracts}
+
+The present audit covers all smart contracts that form the core of the MuesliSwap On-Chain Governance platform. In particular, the following components located in the repository have been reviewed:
+
+\begin{itemize}
+    \item \texttt{src/treasury\_onchain\_voting/contracts/onchain/gov\_state}
+    \item \texttt{src/treasury\_onchain\_voting/contracts/onchain/licenses}
+    \item \texttt{src/treasury\_onchain\_voting/contracts/onchain/staking}
+    \item \texttt{src/treasury\_onchain\_voting/contracts/onchain/tally}
+    \item \texttt{src/treasury\_onchain\_voting/contracts/onchain/treasury}
+    \item \texttt{src/treasury\_onchain\_voting/contracts/onchain/utils}
+\end{itemize}
+
+These modules collectively implement the governance and treasury mechanisms that enable decentralized decision-making and treasury management within the MuesliSwap ecosystem. The audit has focused exclusively on the correctness, safety, and consistency of these components.
+
+\paragraph{Exclusions.}
+The contracts located in:
+\begin{quote}
+\texttt{src/treasury\_onchain\_voting/contracts/onchain/amm\_pool}
+\end{quote}
+were \emph{not} included in the scope of this audit. These components were added to the project after the audit process had been completed.
+
+The exclusion is justified by the fact that the \texttt{amm\_pool} module is not part of the core governance system. Instead, it serves as a \emph{prototype implementation} that mimics an automated market maker (AMM) protocol with basic functionality. It is intended solely for demonstration purposes—to illustrate how the governance system can be used to update protocol parameters of external smart contracts.
+
+At the time of the audit, this AMM prototype:
+\begin{itemize}
+    \item was not deployed and is not recommended for deployment in its current form,
+    \item does not represent a production-ready or security-hardened implementation,
+    \item serves exclusively to demonstrate the interaction between a protocol and the on-chain governance system.
+\end{itemize}
+
+The responsibility of the governance system is limited to securely providing a UTxO with an associated datum that attests that certain parameters have been approved through a valid on-chain election with majority consensus. What external protocols (such as AMMs or other DeFi systems) subsequently do with this datum, and how they incorporate it into their logic, falls outside the governance system’s responsibility and should be subject to separate and independent security audits within the scope of those respective protocols.
+
 \section{Audit Methodology}
 The audit was conducted by a team of experienced blockchain developers and security experts.
 The audit process involved a comprehensive review of the provided codebase, focusing on the following key areas:
