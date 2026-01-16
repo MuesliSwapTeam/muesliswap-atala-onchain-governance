@@ -27,16 +27,15 @@
 
     \item \textbf{Project completed in:} October 2025
 
-
     \item \textbf{Challenge KPIs and how the project addressed them:}
     \begin{itemize}
         \item \textbf{Decentralization and Governance:} Delivered open-source smart contracts and infrastructure enabling on-chain treasury management and parameter updates governed by community voting, directly advancing decentralized decision-making on Cardano.
-        \item \textbf{Atala PRISM Adoption:} Implemented DID integration within the governance framework, demonstrating practical use of Atala PRISM for identity-secured, tokenless voting systems.
+        \item \textbf{Atala PRISM Adoption:} Designed and implemented a DID-based identity layer aligned with the Atala PRISM model, and demonstrated identity-secured governance workflows using a mock DID mechanism after the discontinuation of available DID providers.
     \end{itemize}
 
     \item \textbf{Project KPIs and how the project addressed them:}
     \begin{itemize}
-        \item \textbf{Atala PRISM DID Integration:} Completed the conceptual design and implemented DID-based authentication for off-chain voting.
+        \item \textbf{DID Integration:} Completed the conceptual design and implementation of DID-based authentication flows for off-chain voting, with a mock DID assignment mechanism used for demonstration due to the unavailability of live Cardano DID providers.
         \item \textbf{On-chain Treasury Contract:} Developed, tested, and internally audited a treasury smart contract allowing community-controlled fund management.
         \item \textbf{Protocol Parameter Governance:} Designed and demonstrated integration of parameter update mechanisms for DeFi protocols governed via smart contracts.
         \item \textbf{Open-source Deliverables:} Released all codebases, documentation, and integration guides publicly on GitHub.
@@ -45,8 +44,8 @@
 
     \item \textbf{Key achievements:}
     \begin{itemize}
-        \item Built a unified governance framework supporting authenticated on-chain voting.
-        \item Successfully integrated Atala PRISM DIDs into governance workflows.
+        \item Built a unified governance framework supporting identity-based on-chain voting.
+        \item Implemented and demonstrated DID-based governance workflows using a mock DID mechanism compatible with Atala PRISM-style identities.
         \item Delivered fully functional treasury and parameter update smart contracts.
         \item Published detailed documentation and tutorials for adoption by other Cardano projects.
     \end{itemize}
@@ -66,7 +65,7 @@
     \end{itemize}
 
     \item \textbf{Final thoughts/comments:}\\
-    The DAO Governance × Atala PRISM project delivered a foundational, open-source governance infrastructure for Cardano. By combining decentralized identity with on-chain treasury management and parameter control, this project strengthens the basis for fully decentralized DAOs. We believe the developed tools will play a central role in shaping the next generation of transparent, community-driven governance on Cardano.
+    The DAO Governance × Atala PRISM project delivered a foundational, open-source governance infrastructure for Cardano. By combining decentralized-identity-based governance concepts with on-chain treasury management and parameter control, this project strengthens the basis for fully decentralized DAOs. While live DID authentication could not be delivered due to external service shutdowns, the resulting architecture is future-proof and ready to integrate real Cardano DID providers once available.
 
     \item \textbf{Links to other relevant project sources or documents:}
     \begin{itemize}
@@ -76,7 +75,7 @@
 \end{itemize}
 
 \section{Introduction}
-This report summarizes the development of an open-source governance framework integrating Atala PRISM decentralized identities (DIDs) with on-chain voting mechanisms.
+This report summarizes the development of an open-source governance framework originally targeting the integration of Atala PRISM decentralized identities (DIDs) with on-chain voting mechanisms.
 The project extends the governance platform previously developed by the MuesliSwap team and adds new components for decentralized treasury management and protocol parameter updates.  
 The goal was to explore how DID-based identity can complement or replace token-based voting and to build the necessary smart contract and backend infrastructure to support this functionality.
 
@@ -89,10 +88,10 @@ The project was carried out over several months and divided into five milestones
     The team sketched how Atala PRISM DIDs could be integrated into the existing off-chain voting system, designed the basic functionality required for a treasury contract and a protocol parameter update interface, and reviewed existing on-chain governance approaches on Cardano.  
     The output was a publicly available document outlining proposed designs, comparisons with existing systems, and reasoning behind selected technical directions.
 
-    \item \textbf{Milestone 2 – Atala PRISM DID Integration:}\\
+    \item \textbf{Milestone 2 – DID Integration:}\\
     In this phase, the team implemented DID support in the governance system.  
     This included a snapshot mechanism for elections, backend infrastructure to handle DID-based identities, and frontend components for user interaction.  
-    The resulting system allowed DID-based participation in the voting process.  
+    Due to the discontinuation of Atala PRISM and other Cardano DID providers, a mock DID assignment mechanism was used to demonstrate DID-based participation in the voting process.  
     The code was released as open source, accompanied by documentation and a short demonstration video.
 
     \item \textbf{Milestone 3 – Treasury Smart Contract:}\\
@@ -101,20 +100,36 @@ The project was carried out over several months and divided into five milestones
     The final audited version was made publicly available on GitHub.
 
     \item \textbf{Milestone 4 – On-Chain Voting:}\\
-    The fourth milestone focused on integrating Atala DID-based authentication with the existing on-chain platform.
-    Internal auditing confirmed correct functionality and no critical vulnerabilities, and the system was tested through trial elections.
+    The fourth milestone focused on integrating DID-based authentication concepts with the existing on-chain platform.  
+    A mock DID mechanism was used to validate end-to-end governance flows, including eligibility checks and vote execution.
 
     \item \textbf{Final Milestone – Protocol Parameter Update Mechanisms:}\\
     The final stage integrated parameter update capabilities into a selected open-source DeFi protocol, namely a simple AMM (automated market making) pool.  
     This required modifications to smart contracts, off-chain tooling, and additional security and functionality tests.  
-    Documentation and tutorials were prepared to support future adoption, alongside community outreach through a blog post, post on social media, and a close-out video.  
-    Successful example transactions on testnet demonstrated the full governance flow—from DID-based voting to protocol parameter updates.
+    Documentation and tutorials were prepared to support future adoption, alongside community outreach through a blog post, social media posts, and a close-out video.  
+    Successful example transactions on testnet demonstrated the full governance flow—from identity-based voting using mock DIDs to protocol parameter updates.
 \end{enumerate}
 
+\section{DID Authentication and Mock Identity Mechanism}
+Originally, this project aimed to integrate live Atala PRISM decentralized identities (DIDs) into the governance system for authentication and voting eligibility.
+
+During the course of the project, Atala PRISM was discontinued, and the fallback DID provider (ProofSpace) also ceased operation. As a result, no live DID authentication service compatible with Cardano was available at the time of final delivery.
+
+To ensure the project could be completed without compromising the remaining milestones, a mock DID assignment mechanism was implemented. This mechanism locally assigns unauthenticated, deterministic DIDs for demonstration and integration purposes.
+
+Importantly:
+\begin{itemize}
+    \item All governance logic consuming DIDs (snapshotting, voting eligibility, minting, and tallying) remains unchanged.
+    \item The mock DID layer affects only authentication and can be replaced by a real DID provider with minimal changes.
+    \item The system architecture remains fully compatible with future Cardano DID solutions.
+\end{itemize}
+
+This approach allowed the project to demonstrate a complete, end-to-end governance flow while remaining aligned with the original design goals.
+
 \section{Conclusion}
-The project successfully delivered a modular governance framework combining identity-based voting, treasury management, and on-chain parameter control.  
-All milestones were completed as planned, with open-source releases, documentation, and testing reports made publicly available.  
-The resulting system provides a practical foundation for future experiments and implementations of decentralized governance within the Cardano ecosystem.
+The project successfully delivered a modular governance framework combining identity-based voting concepts, treasury management, and on-chain parameter control.  
+All milestones were completed with open-source releases, documentation, and testing reports made publicly available.  
+While live DID authentication could not be delivered due to external service shutdowns, the resulting system provides a practical and future-proof foundation for decentralized governance within the Cardano ecosystem.
 
 \bigskip
 
