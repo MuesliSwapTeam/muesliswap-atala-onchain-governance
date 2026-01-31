@@ -4,6 +4,9 @@ This repository contains the documentation and code for the implementation
 of the project DAO Governance x Atala PRISM, proposed by the MuesliSwap team
 in Fund 10 of Project Catalyst [1].
 
+**Note:** The project explores DID-based DAO governance on Cardano, including credential-gated voting, treasury control, and on-chain governance logic.
+Due to the discontinuation of Atala PRISM and other Cardano DID providers during the project, the authentication layer was adapted to use a mock DID assignment mechanism for demonstration and integration purposes.
+
 ## Structure
 
 ### Report
@@ -11,11 +14,13 @@ in Fund 10 of Project Catalyst [1].
 The directory `report` contains a detailed report of our research results, design sketch,
 and implementation strategy as promised for Milestone 1 of the project.
 
-### Atala PRISM Authenticanion NFT Minting Tool (Milestone 1)
+### DID Authenticanion NFT Minting Tool (Milestone 1)
+
+**Note:** This component now uses mock DIDs instead of a live DID provider.
 
 The directory `src/auth_nft_minting_tool` contains the source code for
- - `frontend`: a Atala PRISM authentication NFT minting tool that uses ProofSpace authentication
- - `hook`: a server that hosts an endpoint to be called by ProofSpace for receiving credentials and storing them in a DB
+ - `frontend`: a frontend for assigning DIDs and minting authentication NFTs (originally via Atala PRISM / ProofSpace, now via a mock DID generator)
+ - `hook`: a backend service that originally received credentials from ProofSpace; currently adapted to accept locally generated mock DIDs
  - `server`: serving the backend used by `frontend` for connecting with the user DID DB populated by `hook`
  - `onchain`: the [OpShin](https://github.com/OpShin) contract used as a minting script for the DID authentication NFT
  - `test`: contains unit and interaction tests for the `hook` and `server` components (and their interaction)
@@ -119,10 +124,10 @@ python3 -m contracts.offchain.treasury.payout --wallet voter
 
 # Demos
 
-## Atala PRISM Authentication NFT Minting Tool
+## (Mock) DID Authentication NFT Minting Tool
 
 A hosted version of this authentication NFT minting tool can be found at [demo.did.muesliswap.com](https://demo.did.muesliswap.com).
-Here's a video of a live demo: [Catalyst Milestone: Atala Prism DID Authentication DEMO](https://www.youtube.com/watch?v=p4tGIZlP1pw).
+Here's the project's close-out video that contains a live demo: [DID Authentication DEMO](https://youtu.be/I1yi5xbXZ3M).
 
 ## Treasury & On-Chain Governance Smart Contracts
 
