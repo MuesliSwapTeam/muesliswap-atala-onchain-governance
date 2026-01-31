@@ -2,7 +2,6 @@ import { FC, useState, useCallback, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, Stack, Typography, Button } from "@mui/material";
 import { ConnectWalletButton } from '@cardano-foundation/cardano-connect-with-wallet';
 import {useAppSelector} from "../app/hooks";
-import logoBig from "../../muesli_logo.png";
 
 const PREV_WALLET_LS_ID = "did-preferred-wallet-connector"
 
@@ -32,9 +31,6 @@ const MintingPage: FC<{}> = () => {
             setCardanoLib(lib as any as ICardanoLib)
         });
         // Initialize wallet
-        if (!(window as any).cardano || !(window as any).cardano.nami) {
-            return;
-        }
         (window as any).cardano[connector].enable().then(async (oldWallet: IWallet) => {
             const wallet: IWallet = ({
                 ...oldWallet,

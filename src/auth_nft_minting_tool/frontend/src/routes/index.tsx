@@ -37,21 +37,25 @@ export const createRoutes = (root: string, user?: User) => {
       path: `${root}`,
       element: <Main><Outlet/></Main>,
       children: [
-        // Optional: remove login route completely or leave it
         {
           path: AuthPath.LOGIN,
+          loader: isLoggedIn,
           element: <LoginForm />
         },
         {
           path: '',
-          index: true,
-          element: <MintingPage />,
+          element: <Outlet/>,
+          loader: authGuard,
+          children: [
+            {path: '', index: true, element: <MintingPage />},
+            {
+              path: 'minting-page',
+              loader: createAccessGuard(AccessLevel.LOW),
+              element: <MintingPage />,
+            },
+          ]
         },
-        {
-          path: 'minting-page',
-          element: <MintingPage />,
-        },
-        { path: '*', element: <Navigate to="" /> }
+        {path: '*', element: <Navigate to="" />}
       ]
     }
   ]);
