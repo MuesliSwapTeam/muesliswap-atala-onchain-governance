@@ -127,7 +127,7 @@ python3 -m contracts.offchain.treasury.payout --wallet voter
 ## (Mock) DID Authentication NFT Minting Tool
 
 A hosted version of this authentication NFT minting tool can be found at [demo.did.muesliswap.com](https://demo.did.muesliswap.com).
-Here's the project's close-out video that contains a live demo: [DID Authentication DEMO](https://youtu.be/I1yi5xbXZ3M).
+Here's the project's close-out video that contains a live demo: [DID Authentication DEMO](https://youtu.be/bRlCJROGb9s).
 
 ## Treasury & On-Chain Governance Smart Contracts
 
