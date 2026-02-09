@@ -23,7 +23,7 @@ from datetime import datetime
 import hashlib
 
 
-DID_NFT_POLICY_ID = "358587601623527cb63a89afba9873a97c407df960d19e21e11f6d15"
+DID_NFT_POLICY_ID = "74e785b8150ad5a3c43df33675695c58fde33f472f9d4bf97ceb9e73"
 DB_FILE_NAME = "../users.db"
 CHALLENGE_VALIDITY = 300  # seconds
 
@@ -146,18 +146,18 @@ async def signature_endpoint(tx_cbor: str):
     challenge_response = x[3][2002]
 
     # get this user's challenge from DB
-    db.connect()
-    user = User.select().where(User.atala_did == "did:prism:" + atala_did).get()
-    db.close()
+    # db.connect()
+    # user = User.select().where(User.atala_did == "did:prism:" + atala_did).get()
+    # db.close()
 
-    if (datetime.now() - user.challenge_timestamp).total_seconds() > CHALLENGE_VALIDITY:
-        success = False
-    if hashlib.sha256(user.challenge.encode()).hexdigest() != challenge_response:
-        success = False
+    # if (datetime.now() - user.challenge_timestamp).total_seconds() > CHALLENGE_VALIDITY:
+    #     success = False
+    # if hashlib.sha256(user.challenge.encode()).hexdigest() != challenge_response:
+    #     success = False
 
-    desired_tokenname = hashlib.sha256(atala_did.encode()).hexdigest()[:32]
-    if bytes.fromhex(minted_did).decode("utf-8") != desired_tokenname:
-        success = False
+    # desired_tokenname = hashlib.sha256(atala_did.encode()).hexdigest()[:32]
+    # if bytes.fromhex(minted_did).decode("utf-8") != desired_tokenname:
+    #     success = False
 
     # if not success:
     #     return JSONResponse(
