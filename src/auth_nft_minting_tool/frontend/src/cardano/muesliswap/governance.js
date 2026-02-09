@@ -36,7 +36,7 @@ export async function mintToken(wallet, atalaDid, challenge) {
   newMetadata[CHALLENGE_RESPONSE] = sha256(challenge)
   console.log(challenge, sha256(challenge))
 
-  const policyIdHex = '358587601623527cb63a89afba9873a97c407df960d19e21e11f6d15'
+  const policyIdHex = '74e785b8150ad5a3c43df33675695c58fde33f472f9d4bf97ceb9e73'
   const assetNameHex = toHex(sha256(atalaDid).slice(0, 32))
   const nftMeta = {
     name: 'Mint Atala DID authentication NFT',
@@ -75,7 +75,7 @@ export async function mintToken(wallet, atalaDid, challenge) {
     Loader.Cardano.Ed25519KeyHash.from_bytes(walletAddress.stake_cred().to_keyhash().to_bytes()),
   )
   txBuilder.add_required_signer(
-    Loader.Cardano.Ed25519KeyHash.from_hex("2ec86e38df0ec36f44da9d8fcb8c6abd15189049382b079ff0c314b9")
+    Loader.Cardano.Ed25519KeyHash.from_hex("36a95f079e147692ff9abe712c1393a59b161752541291972a763074")
   )
 
   const mintWitness = Loader.Cardano.MintWitness.new_plutus_script(plutusScriptSource, redeemer)

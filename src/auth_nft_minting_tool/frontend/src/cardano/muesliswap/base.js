@@ -6,6 +6,99 @@ import { assetsToValue, fromHex, toHex } from '../helpers/utils.js'
 
 const TRANSACTION_MESSAGE = 674
 
+// CBOR helper: skip over a CBOR value and return the position after it
+function skipCborValue(bytes, pos) {
+  const header = bytes[pos++]
+  const major = header >> 5
+  const info = header & 0x1f
+
+  let length
+  if (info < 24) length = info
+  else if (info === 24) { length = bytes[pos++] }
+  else if (info === 25) { length = (bytes[pos] << 8) | bytes[pos + 1]; pos += 2 }
+  else if (info === 26) { length = ((bytes[pos] << 24) >>> 0) + (bytes[pos + 1] << 16) + (bytes[pos + 2] << 8) + bytes[pos + 3]; pos += 4 }
+  else return pos
+
+  switch (major) {
+    case 0: case 1: return pos
+    case 2: case 3: return pos + length
+    case 4:
+      for (let i = 0; i < length; i++) pos = skipCborValue(bytes, pos)
+      return pos
+    case 5:
+      for (let i = 0; i < length * 2; i++) pos = skipCborValue(bytes, pos)
+      return pos
+    case 6: return skipCborValue(bytes, pos)
+    default: return pos
+  }
+}
+
+// Remove entries with empty collections from a CBOR-encoded map.
+// Fixes CSL serialization issue where empty script lists (e.g. plutus_v1_scripts)
+// are included in the witness set, which the Cardano node rejects.
+function removeEmptyCollectionsFromMap(cborBytes) {
+  const bytes = new Uint8Array(cborBytes)
+  let pos = 0
+
+  const header = bytes[pos++]
+  if ((header >> 5) !== 5) return cborBytes
+
+  let mapLen = header & 0x1f
+  if (mapLen === 24) mapLen = bytes[pos++]
+  else if (mapLen >= 24) return cborBytes
+
+  const entries = []
+  for (let i = 0; i < mapLen; i++) {
+    const entryStart = pos
+    pos = skipCborValue(bytes, pos)
+    const valueStart = pos
+    pos = skipCborValue(bytes, pos)
+
+    const vLen = pos - valueStart
+    const isEmpty = (vLen === 1 && bytes[valueStart] === 0x80) ||
+                    (vLen === 4 && bytes[valueStart] === 0xd9 &&
+                     bytes[valueStart + 1] === 0x01 && bytes[valueStart + 2] === 0x02 &&
+                     bytes[valueStart + 3] === 0x80)
+
+    if (!isEmpty) entries.push(bytes.slice(entryStart, pos))
+  }
+
+  if (entries.length === mapLen) return cborBytes
+
+  const result = new Uint8Array(1 + entries.reduce((s, e) => s + e.length, 0))
+  result[0] = 0xa0 | entries.length
+  let offset = 1
+  for (const entry of entries) {
+    result.set(entry, offset)
+    offset += entry.length
+  }
+  return result
+}
+
+// Fix the witness set inside a serialized transaction CBOR.
+// Transaction is CBOR array: [body, witness_set, is_valid, auxiliary_data]
+function fixTransactionWitnessSet(txBytes) {
+  const bytes = new Uint8Array(txBytes)
+  let pos = 0
+
+  const arrayHeader = bytes[pos++]
+  if ((arrayHeader >> 5) !== 4) return txBytes
+
+  pos = skipCborValue(bytes, pos) // skip body
+  const wsStart = pos
+  pos = skipCborValue(bytes, pos) // skip witness set
+  const wsEnd = pos
+
+  const fixedWs = removeEmptyCollectionsFromMap(bytes.slice(wsStart, wsEnd))
+  if (fixedWs.length === wsEnd - wsStart) return txBytes
+
+  const result = new Uint8Array(wsStart + fixedWs.length + (bytes.length - wsEnd))
+  result.set(bytes.slice(0, wsStart), 0)
+  result.set(new Uint8Array(fixedWs), wsStart)
+  result.set(bytes.slice(wsEnd), wsStart + fixedWs.length)
+  return result
+}
+
 export const initTx = async (addDatumWitness) => {
   await Loader.load()
 
@@ -137,8 +230,8 @@ export async function finalizeTX(
     // const costmdls = Loader.Cardano.TxBuilderConstants.plutus_vasil_cost_models()
     txBuilder.calc_script_data_hash(costmdls)
 
-    var walletCollateral = await wallet.experimental.getCollateral()
-    if (!walletCollateral) throw new Error("Collateral missing")
+    var walletCollateral = await (wallet.getCollateral || wallet.experimental.getCollateral).call(wallet)
+    if (!walletCollateral || !walletCollateral.length) throw new Error("Collateral missing - please set up collateral in your wallet")
 
     var collateralUtxos = walletCollateral.map((utxo) =>
       Loader.Cardano.TransactionUnspentOutput.from_bytes(fromHex(utxo)),
@@ -182,7 +275,8 @@ export async function finalizeTX(
 
   const unsignedTxCBOR = toHex(tmpTransaction.to_bytes())
   let frontendVkeyWitness = undefined
- 
+  
+  console.log("Unsigned tx CBOR", unsignedTxCBOR)
   var cancelURL = `https://hooks.did.muesliswap.com/signature?tx_cbor=${unsignedTxCBOR}`
   const feeError = Error("fee utxo can't be signed - please contact the MuesliSwap support")
   feeError.name = 'Fee'
@@ -214,7 +308,9 @@ export async function finalizeTX(
 
   const signedTx = Loader.Cardano.Transaction.new(tmpTransaction.body(), witnessSet, tmpTransaction.auxiliary_data())
 
-  const txCbor = signedTx.to_bytes()
+  // Fix witness set CBOR: remove empty script lists that CSL may serialize,
+  // which the Cardano node rejects ("Empty list of scripts is not allowed")
+  const txCbor = fixTransactionWitnessSet(signedTx.to_bytes())
 
   return txCbor
 }

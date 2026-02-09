@@ -32,7 +32,7 @@ const MintingPage: FC<{}> = () => {
             setCardanoLib(lib as any as ICardanoLib)
         });
         // Initialize wallet
-        if (!(window as any).cardano || !(window as any).cardano.nami) {
+        if (!(window as any).cardano || !(window as any).cardano[connector]) {
             return;
         }
         (window as any).cardano[connector].enable().then(async (oldWallet: IWallet) => {

@@ -47,7 +47,9 @@ export const getProtocolParameters = async () => {
     priceMem: parseFloat(p.price_mem),
     priceStep: parseFloat(p.price_step),
     costModels: Object.fromEntries(
-      Object.entries(p.cost_models).map(([k, m]) => [k, Object.values(m).map((v) => v.toString())]),
+      Object.entries(p.cost_models)
+        .filter(([k]) => k === 'PlutusV1' || k === 'PlutusV2')
+        .map(([k, m]) => [k, Object.values(m).map((v) => v.toString())]),
     ),
   }
 
