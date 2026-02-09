@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer'
 
 import Loader from './loader.js'
+import { getNetworkConfig } from '../networkConfig'
 
 export const fromHex = (hex) => Buffer.from(hex, 'hex')
 export const toHex = (bytes) => Buffer.from(bytes).toString('hex')
@@ -82,5 +83,6 @@ function unixTimeToEnclosingSlot(unixTime, slotConfig) {
 }
 
 export function unixTimeToSlot(unixTime) {
-  return unixTimeToEnclosingSlot(unixTime, SLOT_CONFIG_NETWORK['Mainnet'])
+  const cfg = getNetworkConfig()
+  return unixTimeToEnclosingSlot(unixTime, SLOT_CONFIG_NETWORK[cfg.slotNetwork])
 }

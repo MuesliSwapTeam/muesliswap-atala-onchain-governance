@@ -1,16 +1,19 @@
 import Loader from './loader.js'
+import { getNetworkConfig } from '../networkConfig'
 
 async function muesliRequest(endpoint, body) {
-  return await fetch('https://api.muesliswap.com' + endpoint, {
+  const cfg = getNetworkConfig()
+  return await fetch(cfg.muesliApiBaseUrl + endpoint, {
     method: body ? 'POST' : 'GET',
     body,
   }).then((res) => res.json())
 }
 
 async function blockfrostRequest(endpoint, body) {
-  return await fetch('https://cardano-mainnet.blockfrost.io/api/v0' + endpoint, {
+  const cfg = getNetworkConfig()
+  return await fetch(cfg.blockfrostBaseUrl + endpoint, {
     headers: {
-      project_id: 'mainnetoxChT32SOnqWIHAwiLXT0uXQoD8UXyMH',
+      project_id: cfg.blockfrostProjectId,
       'User-Agent': 'muesliswap',
     },
     method: body ? 'POST' : 'GET',

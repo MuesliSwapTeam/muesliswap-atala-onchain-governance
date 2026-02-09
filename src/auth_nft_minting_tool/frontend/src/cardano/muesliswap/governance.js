@@ -3,6 +3,7 @@ import Loader from '../helpers/loader.js'
 import { fromHex, toHex } from '../helpers/utils.js'
 import { ATALA_DID_CONTRACT } from '../constants'
 import { sha256 } from 'js-sha256';
+import { getNetworkConfig } from '../networkConfig'
 
 const CIP25 = 721
 const TRANSACTION_MESSAGE = 674
@@ -36,7 +37,8 @@ export async function mintToken(wallet, atalaDid, challenge) {
   newMetadata[CHALLENGE_RESPONSE] = sha256(challenge)
   console.log(challenge, sha256(challenge))
 
-  const policyIdHex = '74e785b8150ad5a3c43df33675695c58fde33f472f9d4bf97ceb9e73'
+  const cfg = getNetworkConfig()
+  const policyIdHex = cfg.mintingPolicyId
   const assetNameHex = toHex(sha256(atalaDid).slice(0, 32))
   const nftMeta = {
     name: 'Mint Atala DID authentication NFT',
@@ -75,7 +77,7 @@ export async function mintToken(wallet, atalaDid, challenge) {
     Loader.Cardano.Ed25519KeyHash.from_bytes(walletAddress.stake_cred().to_keyhash().to_bytes()),
   )
   txBuilder.add_required_signer(
-    Loader.Cardano.Ed25519KeyHash.from_hex("36a95f079e147692ff9abe712c1393a59b161752541291972a763074")
+    Loader.Cardano.Ed25519KeyHash.from_hex(cfg.requiredSignerKeyHash)
   )
 
   const mintWitness = Loader.Cardano.MintWitness.new_plutus_script(plutusScriptSource, redeemer)
@@ -105,7 +107,8 @@ export async function mintToken(wallet, atalaDid, challenge) {
 }
 
 export async function getAllDelegationTokens(wallet) {
-  const policyId = '3c84b8302198a7fe0beaafb9bbefd53010b047413d8832f3a76b9241'
+  const cfg = getNetworkConfig()
+  const policyId = cfg.delegationPolicyId
   var tokenList = []
 
   if (!wallet) return tokenList

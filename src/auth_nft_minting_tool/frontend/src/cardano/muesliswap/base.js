@@ -3,6 +3,7 @@ import CoinSelection from '../helpers/coinSelection.js'
 import { getProtocolParameters, getTXBuilderConfig } from '../helpers/config'
 import Loader from '../helpers/loader.js'
 import { assetsToValue, fromHex, toHex } from '../helpers/utils.js'
+import { getNetworkConfig } from '../networkConfig'
 
 const TRANSACTION_MESSAGE = 674
 
@@ -277,7 +278,8 @@ export async function finalizeTX(
   let frontendVkeyWitness = undefined
   
   console.log("Unsigned tx CBOR", unsignedTxCBOR)
-  var cancelURL = `https://hooks.did.muesliswap.com/signature?tx_cbor=${unsignedTxCBOR}`
+  const cfg = getNetworkConfig()
+  var cancelURL = `${cfg.hookBaseUrl}/signature?tx_cbor=${unsignedTxCBOR}`
   const feeError = Error("fee utxo can't be signed - please contact the MuesliSwap support")
   feeError.name = 'Fee'
   try {

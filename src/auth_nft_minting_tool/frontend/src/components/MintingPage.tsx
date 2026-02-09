@@ -1,8 +1,10 @@
 import { FC, useState, useCallback, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, Stack, Typography, Button } from "@mui/material";
+import { Card, CardContent, CardHeader, Stack, Typography, Button, FormControlLabel, Switch } from "@mui/material";
 import { ConnectWalletButton } from '@cardano-foundation/cardano-connect-with-wallet';
+import { NetworkType } from '@cardano-foundation/cardano-connect-with-wallet-core';
 import {useAppSelector} from "../app/hooks";
 import logoBig from "../../muesli_logo.png";
+import { getCurrentNetwork, setCurrentNetwork } from '../cardano/networkConfig';
 
 const PREV_WALLET_LS_ID = "did-preferred-wallet-connector"
 
@@ -16,12 +18,25 @@ interface IWallet {
     getUsedAddresses: () => Promise<string[]>
     getUnusedAddresses: () => Promise<string[]>
     getAddress: () => Promise<string>
+    getNetworkId: () => Promise<number>
 }
 
 const MintingPage: FC<{}> = () => {
     const [cardanoLib, setCardanoLib] = useState<ICardanoLib>()
     const [wallet, setWallet] = useState<IWallet>()
     const [error, setError] = useState<Error>()
+    const [network, setNetwork] = useState<string>(getCurrentNetwork())
+
+    const isTestnet = network === 'preprod'
+
+    const handleNetworkToggle = useCallback(() => {
+        const newNetwork = isTestnet ? 'mainnet' : 'preprod'
+        setCurrentNetwork(newNetwork)
+        setNetwork(newNetwork)
+        setWallet(undefined)
+        setCardanoLib(undefined)
+        window.localStorage.removeItem(PREV_WALLET_LS_ID)
+    }, [isTestnet])
 
     const connectWallet = useCallback((connector: string) => {
         // remember wallet for page reloads
@@ -35,7 +50,17 @@ const MintingPage: FC<{}> = () => {
         if (!(window as any).cardano || !(window as any).cardano[connector]) {
             return;
         }
-        (window as any).cardano[connector].enable().then(async (oldWallet: IWallet) => {
+        (window as any).cardano[connector].enable().then(async (oldWallet: any) => {
+            // Verify wallet network matches selected network
+            const walletNetworkId = await oldWallet.getNetworkId()
+            const expectedNetworkId = isTestnet ? 0 : 1
+            if (walletNetworkId !== expectedNetworkId) {
+                setError(new Error(
+                    `Network mismatch: wallet is on ${walletNetworkId === 1 ? 'mainnet' : 'testnet'} but app is set to ${isTestnet ? 'Preprod Testnet' : 'Mainnet'}. Please switch your wallet network or toggle the network setting.`
+                ))
+                return
+            }
+
             const wallet: IWallet = ({
                 ...oldWallet,
                 getAddress: async () => {
@@ -47,8 +72,9 @@ const MintingPage: FC<{}> = () => {
                 }
             })
             setWallet(wallet)
+            setError(undefined)
         })
-    }, [])
+    }, [isTestnet])
 
     const initialLoad = useRef(true)
     useEffect(() => {
@@ -77,8 +103,20 @@ const MintingPage: FC<{}> = () => {
                     )}
                 />
                 <CardContent sx={{ minHeight: '300px' }}>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={isTestnet}
+                                onChange={handleNetworkToggle}
+                            />
+                        }
+                        label={isTestnet ? 'Preprod Testnet' : 'Mainnet'}
+                        sx={{ mb: 2, display: 'block' }}
+                    />
                     <ConnectWalletButton
+                        key={network}
                         message="Please sign Augusta Ada King, Countess of Lovelace"
+                        limitNetwork={isTestnet ? NetworkType.TESTNET : NetworkType.MAINNET}
                         onConnect={connectWallet}
                         onDisconnect={() => setWallet(undefined)}
                     />
